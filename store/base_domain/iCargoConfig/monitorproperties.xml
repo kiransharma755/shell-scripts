@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MTR:Properties xmlns:MTR="http://www.ibsplc.com/xibase/monitoring/properties">
+     <MTR:Counters>
+     	<MTR:Counter name="COUNTER1">
+     	     <MTR:ObjectName>com.ibsplc.icargo:type=testing.counter,code=AV</MTR:ObjectName>
+     	     <MTR:Attribute>TestParam1</MTR:Attribute>
+     	     <MTR:Threshold>1000</MTR:Threshold>
+     	     <MTR:Granularity>1000</MTR:Granularity>
+     	     <MTR:Message>TestParam1 value has exceeded the threshold</MTR:Message>
+     	</MTR:Counter>
+     </MTR:Counters>
+     <MTR:Gauges>
+     	<MTR:Gauge name="GAUGE1-CACHE">
+     	     <MTR:ObjectName>com.ibsplc.xibase:type=cache.cacheAdministrator,name=privligecache,code=AV</MTR:ObjectName>
+     	     <MTR:Attribute>TotalCount</MTR:Attribute>
+     	     <MTR:LowThreshold>50</MTR:LowThreshold>
+     	     <MTR:HighThreshold>100</MTR:HighThreshold>
+     	     <MTR:Granularity>500</MTR:Granularity>
+     	     <MTR:Message>TestParam2 value has crossed the threshold</MTR:Message>
+     	</MTR:Gauge>
+     </MTR:Gauges>
+     <MTR:Strings>
+     	<MTR:String name="STRING1">
+     	     <MTR:ObjectName>com.ibsplc.icargo:type=icargo.platform.Config,code=AV</MTR:ObjectName>
+     	     <MTR:Attribute>CompanyCode</MTR:Attribute>
+     	     <MTR:StringMatch>AA</MTR:StringMatch>
+     	     <MTR:Granularity>1000</MTR:Granularity>
+     	     <MTR:Message>The value of the attribute CompanyCode has changed to AA</MTR:Message>
+     	</MTR:String>
+     </MTR:Strings>
+     <MTR:ExMonitors>
+     	<MTR:ExMonitor name="appMonitor">
+     	     <MTR:Frequency>5000</MTR:Frequency>
+     	     <MTR:MonitorClass>com.ibsplc.xibase.server.framework.management.monitor.ApplicationMonitor</MTR:MonitorClass>
+ 	     	 <Attribute Key="SERVERURL">
+ 	     		  <Value>http://n7324:9081/icargo</Value>
+ 	     	  </Attribute>					
+	       	  <MTR:Status>ICOISACTIVE</MTR:Status>
+     	</MTR:ExMonitor>
+     	<MTR:ExMonitor name="webMonitor">
+     	     <MTR:Frequency>5000</MTR:Frequency>
+     	     <MTR:MonitorClass>com.ibsplc.xibase.server.framework.management.monitor.WebMonitor</MTR:MonitorClass>
+ 	     	 <Attribute Key="SERVERURL">
+ 	     		  <Value>http://n7313</Value>
+ 	     	  </Attribute>					
+	       	  <MTR:Status>ICOISACTIVE</MTR:Status>
+     	</MTR:ExMonitor>
+     </MTR:ExMonitors>
+</MTR:Properties>

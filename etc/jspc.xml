@@ -1,0 +1,26 @@
+<project name="icargo-main" default="jspc" basedir=".">
+
+	<property name="war-dir" value="${ear.home}/icargo-web"/>
+	<property name="WEB-INF" value="${war-dir}/WEB-INF"/>
+	<property name="classes" value="${WEB-INF}/classes"/>
+	<property name="lib" value="${WEB-INF}/lib"/>
+	<property name="jsp.maxfiles" value="100"/>
+	<property name="jsp.classpath" value="${WL_HOME}/server/lib/weblogic.jar:${JAVA_HOME}/lib/rt.jar"/>
+
+	  <target name="jspc" >
+		<echo>${war-dir} ${classes}</echo>
+	          <java classname="weblogic.jspc" fork="yes">
+	            <sysproperty key="weblogic.home" value="${WL_HOME}/server"/>
+	            <arg line="-webapp ${war-dir} -verboseJspc -d ${classes} -k -compileAll -maxfiles ${jsp.maxfiles}"/>
+	          	<jvmarg line="-Xms1024m -Xmx2048m -XX:PermSize=256m -XX:MaxPermSize=512m"/>
+	            <classpath>
+	              <pathelement path="${jsp.classpath}"/>
+		      		  <fileset dir="${war-dir}/../APP-INF/lib">
+                         <include name="*.jar" />
+                      </fileset>
+	            </classpath>
+	          </java>
+	    </target>
+
+</project>
+

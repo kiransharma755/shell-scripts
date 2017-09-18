@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- &lt;!DOCTYPE JMS:Services SYSTEM &quot;JMSServices.dtd&quot;&gt; --><!-- JMS Services --><JMS:Services xmlns:JMS="http://www.ibsplc.com/ejb/jmsservices/">
+
+
+ <JMS:Service>
+    <JMS:ServiceId>1</JMS:ServiceId>
+    <JMS:ServiceName>ICARGO_MSGBROKER_QUEUE</JMS:ServiceName>
+    <JMS:JndiName>icargo.msgbroker.email</JMS:JndiName>
+    <JMS:ServerName>Weblogic</JMS:ServerName>
+    <JMS:Type>Queue</JMS:Type>
+  </JMS:Service>
+
+ <JMS:Service>
+    <JMS:ServiceId>2</JMS:ServiceId>
+    <JMS:ServiceName>ICARGO_TRACKING_QUEUE</JMS:ServiceName>
+    <JMS:JndiName>IcargoTrackingQueue</JMS:JndiName>
+    <JMS:ServerName>Weblogic</JMS:ServerName>
+    <JMS:Type>Queue</JMS:Type>
+  </JMS:Service>
+
+ <JMS:Service>
+    <JMS:ServiceId>3</JMS:ServiceId>
+    <JMS:ServiceName>iCargoAutoRefreshTopic</JMS:ServiceName>
+    <JMS:JndiName>com.ibsplc.icargo.autorefresh.Topic</JMS:JndiName>
+    <JMS:ServerName>Weblogic</JMS:ServerName>
+    <JMS:Type>Topic</JMS:Type>
+  </JMS:Service>
+
+ <JMS:Service>
+    <JMS:ServiceId>4</JMS:ServiceId>
+    <JMS:ServiceName>DefaultJmsConnectionFactory</JMS:ServiceName>
+    <JMS:JndiName>DefaultJmsConnectionFactory</JMS:JndiName>
+    <JMS:ServerName>Weblogic</JMS:ServerName>
+    <JMS:Type>Queue</JMS:Type>
+  </JMS:Service>
+
+ <JMS:Service>
+    <JMS:ServiceId>5</JMS:ServiceId>
+    <JMS:ServiceName>DefaultTopicJmsConnectionFactory</JMS:ServiceName>
+    <JMS:JndiName>DefaultTopicJmsConnectionFactory</JMS:JndiName>
+    <JMS:ServerName>Weblogic</JMS:ServerName>
+    <JMS:Type>Topic</JMS:Type>
+  </JMS:Service>
+
+ <JMS:Service>
+    <JMS:ServiceId>6</JMS:ServiceId>
+    <JMS:ServiceName>icargo_msgbroker</JMS:ServiceName>
+    <JMS:JndiName>com.ibsplc.icargo.msgbroker.message.OutgoingMessageQueue</JMS:JndiName>
+    <JMS:ServerName>Weblogic</JMS:ServerName>
+    <JMS:Type>Queue</JMS:Type>
+  </JMS:Service>
+
+  <JMS:Service>
+    <JMS:ServiceId>7</JMS:ServiceId>
+    <JMS:ServiceName>iCargoAlertPaneTopic</JMS:ServiceName>
+    <JMS:JndiName>com.ibsplc.icargo.alert.Topic</JMS:JndiName>
+    <JMS:ServerName>Weblogic</JMS:ServerName>
+    <JMS:Type>Topic</JMS:Type>
+  </JMS:Service>
+
+
+   <JMS:Service>
+      <JMS:ServiceId>8</JMS:ServiceId>
+      <JMS:ServiceName>TX_AUDIT_QUEUE</JMS:ServiceName>
+      <JMS:JndiName>com.ibsplc.xibase.txAudit.AuditQueue</JMS:JndiName>
+      <JMS:ServerName>Weblogic</JMS:ServerName>
+      <JMS:Type>Queue</JMS:Type>
+  </JMS:Service>
+
+
+
+  <JMS:Service>
+	    <JMS:ServiceId>9</JMS:ServiceId>
+	    <JMS:ServiceName>ASYNC_QUEUE</JMS:ServiceName>
+	    <JMS:JndiName>com.ibsplc.xibase.framework.async.ConcurrentQueue</JMS:JndiName>
+	    <JMS:ServerName>Weblogic</JMS:ServerName>
+	    <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+    <JMS:Service>
+            <JMS:ServiceId>10</JMS:ServiceId>
+            <JMS:ServiceName>ASYNC_SEQUENCED_QUEUE</JMS:ServiceName>
+            <JMS:JndiName>com.ibsplc.xibase.framework.async.SequencedQueue</JMS:JndiName>
+            <JMS:ServerName>Weblogic</JMS:ServerName>
+            <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+    <JMS:Service>
+              <JMS:ServiceId>11</JMS:ServiceId>
+              <JMS:ServiceName>ASYNC_ERROR_QUEUE</JMS:ServiceName>
+              <JMS:JndiName>com.ibsplc.xibase.framework.async.ErrorQueue</JMS:JndiName>
+              <JMS:ServerName>Weblogic</JMS:ServerName>
+              <JMS:Type>Queue</JMS:Type>
+  </JMS:Service>
+
+ <JMS:Service>
+                <JMS:ServiceId>12</JMS:ServiceId>
+                <JMS:ServiceName>com.ibsplc.icargo.framework.report.NormalReportQueue</JMS:ServiceName>
+                <JMS:JndiName>com.ibsplc.icargo.framework.report.NormalReportQueue</JMS:JndiName>
+                <JMS:ServerName>Weblogic</JMS:ServerName>
+                <JMS:Type>Queue</JMS:Type>
+  </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>13</JMS:ServiceId>
+                  <JMS:ServiceName>ACCOUNTING_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.accounting.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+
+   <JMS:Service>
+                  <JMS:ServiceId>14</JMS:ServiceId>
+                  <JMS:ServiceName>ADMIN_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.admin.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>15</JMS:ServiceId>
+                  <JMS:ServiceName>CAPACITY_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.capacity.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>16</JMS:ServiceId>
+                  <JMS:ServiceName>CAP_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.cap.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>17</JMS:ServiceId>
+                  <JMS:ServiceName>CASHIERING_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.cashiering.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>18</JMS:ServiceId>
+                  <JMS:ServiceName>CLAIMS_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.claims.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>19</JMS:ServiceId>
+                  <JMS:ServiceName>COURIER_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.courier.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>20</JMS:ServiceId>
+                  <JMS:ServiceName>CUSTOMS_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.customs.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>21</JMS:ServiceId>
+                  <JMS:ServiceName>FLIGHT_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.flight.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>22</JMS:ServiceId>
+                  <JMS:ServiceName>MAILTRACKING_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.mailtracking.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>23</JMS:ServiceId>
+                  <JMS:ServiceName>MSGBROKER_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.msgbroker.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>24</JMS:ServiceId>
+                  <JMS:ServiceName>OPERATIONS_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.operations.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>25</JMS:ServiceId>
+                  <JMS:ServiceName>PRODUCTS_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.products.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>26</JMS:ServiceId>
+                  <JMS:ServiceName>SALES_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.sales.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>27</JMS:ServiceId>
+                  <JMS:ServiceName>SHARED_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.shared.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>28</JMS:ServiceId>
+                  <JMS:ServiceName>SLAM_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.slam.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>29</JMS:ServiceId>
+                  <JMS:ServiceName>STOCKCONTROL_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.stockcontrol.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>30</JMS:ServiceId>
+                  <JMS:ServiceName>TARIFF_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.tariff.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>31</JMS:ServiceId>
+                  <JMS:ServiceName>TRACING_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.tracing.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>32</JMS:ServiceId>
+                  <JMS:ServiceName>TRACKING_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.tracking.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>33</JMS:ServiceId>
+                  <JMS:ServiceName>ULD_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.uld.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>34</JMS:ServiceId>
+                  <JMS:ServiceName>WAREHOUSE_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.warehouse.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>35</JMS:ServiceId>
+                  <JMS:ServiceName>WORKFLOW_AUDIT_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.xibase.workflow.audit</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+   <JMS:Service>
+                  <JMS:ServiceId>36</JMS:ServiceId>
+                  <JMS:ServiceName>MSGBROKER_RETRY_QUEUE</JMS:ServiceName>
+                  <JMS:JndiName>com.ibsplc.icargo.msgbroker.message.MessageRetryQueue</JMS:JndiName>
+                  <JMS:ServerName>Weblogic</JMS:ServerName>
+                  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+    <JMS:Service>
+                      <JMS:ServiceId>37</JMS:ServiceId>
+                      <JMS:ServiceName>CRA_AUDIT_QUEUE</JMS:ServiceName>
+                      <JMS:JndiName>com.ibsplc.xibase.cra.audit</JMS:JndiName>
+                      <JMS:ServerName>Weblogic</JMS:ServerName>
+                      <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+    <JMS:Service>
+          <JMS:ServiceId>38</JMS:ServiceId>
+          <JMS:ServiceName>com.ibsplc.xibase.framework.audit.AuditQueue</JMS:ServiceName>
+          <JMS:JndiName>com.ibsplc.xibase.framework.audit.AuditQueue</JMS:JndiName>
+          <JMS:ServerName>Weblogic</JMS:ServerName>
+          <JMS:Type>Queue</JMS:Type>
+      </JMS:Service>
+
+<JMS:Service>
+        <JMS:ServiceId>39</JMS:ServiceId>
+        <JMS:ServiceName>icargo_incomingmsg</JMS:ServiceName>
+        <JMS:JndiName>icargo.eai.IncomingMessageQueue</JMS:JndiName>
+        <JMS:ServerName>Weblogic</JMS:ServerName>
+        <JMS:Type>Queue</JMS:Type>
+  </JMS:Service>
+
+   <JMS:Service>
+		  <JMS:ServiceId>40</JMS:ServiceId>
+		  <JMS:ServiceName>JOBSCHEDULER_AUDIT_QUEUE</JMS:ServiceName>
+		  <JMS:JndiName>com.ibsplc.xibase.jobscheduler.audit</JMS:JndiName>
+		  <JMS:ServerName>Weblogic</JMS:ServerName>
+		  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+    <JMS:Service>
+    	<JMS:ServiceId>41</JMS:ServiceId>
+    	<JMS:ServiceName>REVENUE_AUDIT_QUEUE</JMS:ServiceName>
+    	<JMS:JndiName>com.ibsplc.xibase.revenue.audit</JMS:JndiName>
+    	<JMS:ServerName>Weblogic</JMS:ServerName>
+    	<JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+    <JMS:Service>
+    	<JMS:ServiceId>42</JMS:ServiceId>
+    	<JMS:ServiceName>OUTGOING_MESSAGE_QUEUE</JMS:ServiceName>
+    	<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.OutgoingMessageQueue</JMS:JndiName>
+    	<JMS:ServerName>Weblogic</JMS:ServerName>
+    	<JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+    <JMS:Service>
+    	<JMS:ServiceId>43</JMS:ServiceId>
+    	<JMS:ServiceName>INCOMING_MESSAGE_SEQ_QUEUE</JMS:ServiceName>
+    	<JMS:JndiName>icargo.eai.sequenced.IncomingMessageQueue</JMS:JndiName>
+    	<JMS:ServerName>Weblogic</JMS:ServerName>
+    	<JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<JMS:Service>
+    	<JMS:ServiceId>44</JMS:ServiceId>
+    	<JMS:ServiceName>MESSAGE_WEBSERVICE_QUEUE</JMS:ServiceName>
+    	<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.WebserviceMessageQueue</JMS:JndiName>
+    	<JMS:ServerName>Weblogic</JMS:ServerName>
+    	<JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+    <JMS:Service>
+    	<JMS:ServiceId>45</JMS:ServiceId>
+    	<JMS:ServiceName>CUSTOM_EAI_MESSAGE_QUEUE</JMS:ServiceName>
+    	<JMS:JndiName>com.ibsplc.icargo.framework.eai.CustomMessageQueue</JMS:JndiName>
+    	<JMS:ServerName>Weblogic</JMS:ServerName>
+    	<JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+    <JMS:Service>
+    	<JMS:ServiceId>46</JMS:ServiceId>
+    	<JMS:ServiceName>EVENT_QUEUE</JMS:ServiceName>
+    	<JMS:JndiName>com.ibsplc.xibase.event.EventHandlerQueue</JMS:JndiName>
+    	<JMS:ServerName>Weblogic</JMS:ServerName>
+    	<JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<!-- Added from TIACT as part of new JTO Framework Changes -->
+    <JMS:Service>
+		    <JMS:ServiceId>47</JMS:ServiceId>
+		    <JMS:ServiceName>iCargoAppClientLoginBroadcastTopic</JMS:ServiceName>
+		    <JMS:JndiName>com.ibsplc.icargo.iCargoAppClientLoginBroadcastTopic</JMS:JndiName>
+		    <JMS:ServerName>Weblogic</JMS:ServerName>
+		    <JMS:Type>Topic</JMS:Type>
+	</JMS:Service>
+
+	<JMS:Service>
+            <JMS:ServiceId>48</JMS:ServiceId>
+            <JMS:ServiceName>CUSTOMERMANAGEMENT_AUDIT_QUEUE</JMS:ServiceName>
+            <JMS:JndiName>com.ibsplc.xibase.customermanagement.audit</JMS:JndiName>
+            <JMS:ServerName>Weblogic</JMS:ServerName>
+            <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<JMS:Service>
+        <JMS:ServiceId>49</JMS:ServiceId>
+	   <JMS:ServiceName>SOAP_OVER_JMS_INCOMING_QUEUE</JMS:ServiceName>
+	   <JMS:JndiName>com.ibsplc.icargo.webservice.async.incoming.SOAPOverJMSQueue</JMS:JndiName>
+	   <JMS:ServerName>Weblogic</JMS:ServerName>
+	   <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<JMS:Service>
+    	<JMS:ServiceId>50</JMS:ServiceId>
+    	<JMS:ServiceName>ADVICE_QUEUE</JMS:ServiceName>
+    	<JMS:JndiName>com.ibsplc.xibase.advice.AdviceHandlerQueue</JMS:JndiName>
+    	<JMS:ServerName>Weblogic</JMS:ServerName>
+    	<JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<JMS:Service>
+		<JMS:ServiceId>51</JMS:ServiceId>
+		<JMS:ServiceName>EHCACHE_BROADCAST_TOPIC</JMS:ServiceName>
+		<JMS:JndiName>com.ibsplc.xibase.ehcache.BroadCastTopic</JMS:JndiName>
+		<JMS:ServerName>Weblogic</JMS:ServerName>
+		<JMS:Type>Topic</JMS:Type>
+	</JMS:Service>
+	<JMS:Service>
+        <JMS:ServiceId>52</JMS:ServiceId>
+	   <JMS:ServiceName>CAPACITY_ALLOTMENT_WS_REQUEST</JMS:ServiceName>
+	   <JMS:JndiName>com.ibsplc.icargo.capacity.allotment.ws.request</JMS:JndiName>
+	   <JMS:ServerName>Weblogic</JMS:ServerName>
+	   <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<JMS:Service>
+        <JMS:ServiceId>53</JMS:ServiceId>
+	   <JMS:ServiceName>CAPACITY_ALLOTMENT_WS_RESPONSE</JMS:ServiceName>
+	   <JMS:JndiName>com.ibsplc.icargo.capacity.allotment.ws.response</JMS:JndiName>
+	   <JMS:ServerName>Weblogic</JMS:ServerName>
+	   <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<JMS:Service>
+            <JMS:ServiceId>54</JMS:ServiceId>
+            <JMS:ServiceName>FLIGHT_OPERATION_STANDARD_WS_REQUEST</JMS:ServiceName>
+            <JMS:JndiName>com.ibsplc.icargo.flight.operation.standard.ws.request</JMS:JndiName>
+            <JMS:ServerName>Weblogic</JMS:ServerName>
+            <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<JMS:Service>
+            <JMS:ServiceId>55</JMS:ServiceId>
+            <JMS:ServiceName>FLIGHT_OPERATION_STANDARD_WS_RESPONSE</JMS:ServiceName>
+            <JMS:JndiName>com.ibsplc.icargo.flight.operation.standard.ws.response</JMS:JndiName>
+            <JMS:ServerName>Weblogic</JMS:ServerName>
+            <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+
+	<JMS:Service>
+			<JMS:ServiceId>56</JMS:ServiceId>
+			<JMS:ServiceName>CUSTOMS_PENDINGMESSAGE_QUEUE</JMS:ServiceName>
+			<JMS:JndiName>com.ibsplc.icargo.customs.message.PendingMessageQueue</JMS:JndiName>
+			<JMS:ServerName>Weblogic</JMS:ServerName>
+			<JMS:Type>Queue</JMS:Type>
+	</JMS:Service>
+
+	<JMS:Service>
+			<JMS:ServiceId>57</JMS:ServiceId>
+			<JMS:ServiceName>CAPACITY_BOOKING_PUBLISH</JMS:ServiceName>
+			<JMS:JndiName>com.ibsplc.icargo.capacity.booking.publish</JMS:JndiName>
+			<JMS:ServerName>Weblogic</JMS:ServerName>
+			<JMS:Type>Queue</JMS:Type>
+	</JMS:Service>
+
+	<JMS:Service>
+			<JMS:ServiceId>58</JMS:ServiceId>
+			<JMS:ServiceName>IQA_MESSAGE_PUBLISH</JMS:ServiceName>
+			<JMS:JndiName>com.ibsplc.icargo.cashiering.qualityassurance.external.publish</JMS:JndiName>
+			<JMS:ServerName>Weblogic</JMS:ServerName>
+			<JMS:Type>Queue</JMS:Type>
+	</JMS:Service>
+
+	<JMS:Service>
+			<JMS:ServiceId>59</JMS:ServiceId>
+			<JMS:ServiceName>com.ibsplc.icargo.framework.event.queue</JMS:ServiceName>
+			<JMS:JndiName>com.ibsplc.icargo.framework.event.queue</JMS:JndiName>
+			<JMS:ServerName>Weblogic</JMS:ServerName>
+			<JMS:Type>Queue</JMS:Type>
+	</JMS:Service>
+	
+	<JMS:Service>
+			<JMS:ServiceId>60</JMS:ServiceId>
+			<JMS:ServiceName>WAREHOUSE_PUBLISH_QUEUE</JMS:ServiceName>
+			<JMS:JndiName>com.ibsplc.icargo.warehouse.defaults.publish</JMS:JndiName>
+			<JMS:ServerName>Weblogic</JMS:ServerName>
+			<JMS:Type>Queue</JMS:Type>
+	</JMS:Service>
+	
+	<JMS:Service>
+	    <JMS:ServiceId>69</JMS:ServiceId>
+	    <JMS:ServiceName>MSGBROKER_ASYNC_QUEUE</JMS:ServiceName>
+	    <JMS:JndiName>com.ibsplc.xibase.msgbroker.async.ConcurrentQueue</JMS:JndiName>
+	    <JMS:ServerName>Weblogic</JMS:ServerName>
+	    <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+	<JMS:Service>
+	  <JMS:ServiceId>70</JMS:ServiceId>
+	  <JMS:ServiceName>RECO_AUDIT_QUEUE</JMS:ServiceName>
+	  <JMS:JndiName>com.ibsplc.xibase.reco.audit</JMS:JndiName>
+	  <JMS:ServerName>Weblogic</JMS:ServerName>
+	  <JMS:Type>Queue</JMS:Type>
+    </JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>63</JMS:ServiceId>
+<JMS:ServiceName>ICO.NETLINE.IN</JMS:ServiceName>
+<JMS:JndiName>icargo.eai.netline.IncomingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>64</JMS:ServiceId>
+<JMS:ServiceName>ICO.TRAXON.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.traxon.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>65</JMS:ServiceId>
+<JMS:ServiceName>ICO.TRAXON.CARDIT.IN</JMS:ServiceName>
+<JMS:JndiName>icargo.eai.traxon.cardit.IncomingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>66</JMS:ServiceId>
+<JMS:ServiceName>ICO.TRAXON.RESDIT.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.traxon.resdit.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>67</JMS:ServiceId>
+<JMS:ServiceName>ICO.MSW.IN</JMS:ServiceName>
+<JMS:JndiName>icargo.eai.msw.IncomingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>68</JMS:ServiceId>
+<JMS:ServiceName>ICO.MSW.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.msw.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>69</JMS:ServiceId>
+<JMS:ServiceName>ICO.EVRIM.IN</JMS:ServiceName>
+<JMS:JndiName>icargo.eai.evrim.IncomingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>70</JMS:ServiceId>
+<JMS:ServiceName>ICO.EVRIM.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.evrim.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>71</JMS:ServiceId>
+<JMS:ServiceName>ICO.DCS.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.dcs.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>72</JMS:ServiceId>
+<JMS:ServiceName>ICO.UHM.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.uhm.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>73</JMS:ServiceId>
+<JMS:ServiceName>ICO.TACTIC.IN</JMS:ServiceName>
+<JMS:JndiName>icargo.eai.tactic.IncomingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>74</JMS:ServiceId>
+<JMS:ServiceName>ICO.TACTIC.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.tactic.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>75</JMS:ServiceId>
+<JMS:ServiceName>ICO.SFTP.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.sftp.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>76</JMS:ServiceId>
+<JMS:ServiceName>ICO.EMAIL.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.email.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<JMS:Service>
+<JMS:ServiceId>77</JMS:ServiceId>
+<JMS:ServiceName>ICO.SMS.OUT</JMS:ServiceName>
+<JMS:JndiName>com.ibsplc.icargo.msgbroker.message.smsgateway.OutgoingMessageQueue</JMS:JndiName>
+<JMS:ServerName>Weblogic</JMS:ServerName>
+<JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+<!-- added for perf test -->
+<JMS:Service>
+   <JMS:ServiceId>78</JMS:ServiceId>
+   <JMS:ServiceName>ICO.MSG.OUT.ALL</JMS:ServiceName>
+   <JMS:JndiName>com.ibsplc.icargo.msgbroker.message.all.OutgoingMessageQueue</JMS:JndiName>
+   <JMS:ServerName>Weblogic</JMS:ServerName>
+   <JMS:Type>Queue</JMS:Type>
+</JMS:Service>
+
+
+</JMS:Services>

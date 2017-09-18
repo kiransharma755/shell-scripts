@@ -1,0 +1,11 @@
+#
+# Weblogic Server configuration file
+#
+# Configuration syntax ( null values are specified as - )
+# ${serverName} ${domainName} ${clusterName} ${domainDirectory} ${serverHost} ${rmiPort} ${jmxPort} ${adminHost} ${adminPort} ${isAdmin} ${contextPath} ${instance short name} ${os user}
+#
+
+# Virtualized servers
+AdminServer base_domain - /cellone/Oracle/Middleware/Oracle_Home/user_projects/domains/base_domain 192.168.9.102 7001 - 192.168.9.102 7001 yes icargo adm oracle
+ico_prf_vm1_ms1 base_domain icoprfcluster /cellone/Oracle/Middleware/Oracle_Home/user_projects/domains/base_domain 192.168.9.102 4001 4999 192.168.9.102 7001 no icargo vm1ms1 oracle
+

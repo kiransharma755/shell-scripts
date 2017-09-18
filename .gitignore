@@ -1,0 +1,5 @@
+# Git ignore file for shell scripts
+
+tmp/
+
+nmon*

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map>
+  <map-item name="logger" value="com.ibsplc.xibase.util.log.javalog.JavaLogger"/>
+  <map-item name="log-control" value="com.ibsplc.xibase.util.log.javalog.JavaLogControl"/>
+  <map-item name="log-config" value="com.ibsplc.xibase.util.log.javalog.JavaLogConfiguration"/>
+  <!--map-item name="handlers" value="com.ibsplc.xibase.util.log.javalog.handler.ConsoleLogHandler,com.ibsplc.xibase.util.log.javalog.handler.FileLogHandler"/-->
+  <map-item name="handlers" value="com.ibsplc.xibase.util.log.javalog.handler.DelegatingLogHandler"/>
+  <map-item name="file-log-on-enabled" value="false"/>
+  <map-item name="console-log-on-enabled" value="false"/>
+  <map-item name="console-log-level" value="ALL"/>
+  <!--map-item name="console-log-formatter" value="com.ibsplc.xibase.util.log.javalog.formatter.ConsoleFormatter"/-->
+  <map-item name="console-log-formatter" value="com.ibsplc.xibase.util.log.javalog.formatter.PrintStreamConsoleFormatter"/>
+  <map-item name="file-log-level" value="ALL"/>
+  <!--map-item name="file-log-formatter" value="com.ibsplc.xibase.util.log.javalog.formatter.ConsoleFormatter"/-->
+  <map-item name="file-log-formatter" value="com.ibsplc.xibase.util.log.javalog.formatter.PrintStreamConsoleFormatter"/>
+  <map-item name="file-count" value="5"/>
+  <map-item name="enable-subsystem-log" value="false"/>
+  <map-item name="default-file-name-pattern" value="log%g.log"/>
+  <map-item name="disable-modules" value="XIBASE TXAUDIT,FLIGHT DEFAULTS,CAPACITY,TARIFF,TARIFF TAX,FLIGHT_OPERATION,TrackingDefaultsController,REFRESH DEFAULTS,PRIVILEGE ACCESS,TXDEBUG,XIBASE LOCK,ASYNC XIBASE,MSGBROKER MESSAGE,ICARGO FRAMEWORK,XIBASE PER,SHARED_AGENT,MSGBROKER CONFIG,QUERY,OPERATIONS ACCEPTANCE,XIBASE,ICARGO,SYSTEM ENVIRONMENT,JOBSCHEDULER,XIBASE FRAMEWORK"/>
+  <map-item name="file-size-limit" value="1048576"/>
+</map>

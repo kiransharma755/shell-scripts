@@ -1,0 +1,592 @@
+	
+References
+[1] – iCargo System Configuration (Dev) - iCargo_QF_System Configuration_DevTest Environment_v0.7.doc
+[2] – iCargo System Configuration (Prod) - iCargo_QF_System Configuration_Prod Environment_v0.5.doc
+
+
+${BOLD}iCargo Maintenance Scripts${NORM}
+${BOLD}1	Introduction${NORM}
+This document details the usage and maintenance of the scripts used for the maintenance of iCargo software/environment for the development and production environments.
+${BOLD}1.1	Types of Scripts
+The following types of scripts are available
+-	iCargo Application deployment script (icoadmin)
+-	iCargo database maintenance script (icoadmin)
+-	iCargo Interface life-cycle control script (icointf)
+-	Other maintenance scripts
+
+${BOLD}2	Script Usage${NORM}
+The scripts are available on the path for user icadm and icorcl in development environment and user icprdadm and icprdorc in production/production-support environments.
+
+${BOLD}2.1	Development Environments${NORM}
+${BOLD}2.1.1	Application Deployment Scripts${NORM}
+The iCargo application deployment script is called “icoadmin”. It can be used for:
+-	deployment of a full iCargo release in WebLogic
+-	deployment of a patch iCargo release in WebLogic
+-	restoring a previous version of iCargo
+
+A full iCargo release is a release of the application in the form of an application archive and configuration archive. The release will contain the following artefacts for deployment onto WebLogic – icargo.ear and iCargoConfig.zip 
+A release made in any other format is called a patch release.
+${BOLD}2.1.1.1	Deployment of a full iCargo release${NORM}
+The following are steps for deployment of a full iCargo release in WebLogic
+1.	Copy icargo.ear and iCargoConfig.zip to the landing location.
+The location of the landing location depends on the environment where the application is being deployed. The location will be /data/domains/ico<xxx>domain<y>/user_stage/landing/app ; where
+ xxx is a three letter code for the environment. The recognized codes are
+
+Environment Identifier	Environment
+int						Integration
+sat						Site Acceptance Testing
+stg						User Acceptance Testing
+dmg						Data Migration
+trg						Training
+
+y is a numeric code representing the number of that type of environment.(The first environment does not have a number; the second has a number 2 and so on). 
+Thus the location of the landing for the two available Integration environments is
+/data/domains/icointdomain/user_stage/landing/app  &
+/data/domains/icointdomain2/user_stage/landing/app
+${BOLD}2.	Run Deployment script${NORM}
+icoadmin deploy <domain name> <icargo version> ; where
+domain name is the environment name as described above.
+for eg deploying version 3.04.4.4.1.19 onto environment Integration and Integration 2
+icoadmin deploy icointdomain 3.04.4.4.1.19 and
+icoadmin deploy icointdomain2 3.04.4.4.1.19 
+Note: The deployment script will explode and deploy the ear and also initiate JSPC for the web-application.
+
+${BOLD}2.1.1.2	Deployment of a patch release of iCargo${NORM}
+
+Patch releases are individual components of icargo.ear. The following diagram illustrates the patch artefacts that can be patched.
+
+icargo
+     +----- *.jar <-- Patches can go here
+     +
+     +-APP-INF
+     +   +---lib
+     +        +----*.jar <--- Patches can go here
+     +
+     +-icargo-web
+          +
+          +--jsp
+          +   +---*.jsp <--- Patches can go here
+          +   +
+          +   +-<product>
+          +        +-<sub-product> 
+          +		+-*.jsp <--- Patches can go here
+          +
+          +--WEB-INF
+               +--lib 
+                   +--*.jar <--- Patches can go here	
+
+The following are steps for deployment of a patch iCargo release in WebLogic
+1.	Create the patch folder structure as sketched above in the patch landing location. The patch landing location varies with the environment
+/data/domains/ico<xxx>domain<y>/user_stage/landing/app/patches 
+Thus to replace a jsp called access.jsp in the location icargo-web/jsp/admin/accesscontol the following folder has to be created in the patch landing location
+/data/domains/icointdomain2/user_stage/landing/app/patches/icargo/icargo-web/jsp/admin/accesscontrol
+2.	Copy patch artefacts in the respective patch location.
+3.	Run deployment script
+icoadmin patch <domain name>
+
+Note: Deployment of individual configuration files (files in the folder iCargoConfig) is not supported through the patch deployment mechanism
+${BOLD}2.1.1.3	Restore a previous version of iCargo${NORM}
+You can restore the last successfully deployed version or any of the previous deployed versions.
+The two methods are
+
+icoadmin restore <domain name> &
+
+icoadmin restoreVersion <domain name> <version>
+
+${BOLD}2.1.1.4	Additional functions${NORM}
+Script icoadmin supports the following additional functions
+
+${BOLD}Trigger JSPC${NORM}
+This function can be used to initiate JSPC for the environment
+icoadmin jspc <domain name>
+Note: This is required whenever a patch deployment having jsp files is done.
+
+${BOLD}Query iCargo version deployed${NORM}
+This function displays the currently deployed version of iCargo
+icoadmin version <domain name>
+
+${BOLD}Query Deployment history${NORM}
+This function displays a log of the recorded deployment activities on the environment
+icoadmin history <domain name>
+${BOLD}2.1.2	 Schema Maintenance Scripts${NORM}
+The iCargo schema maintenance script is called “icoadmin”. It can be used for:
+-	Refresh the schema of any environment with an “imp” dump
+-	Apply SQL (DML) scripts to schema of any environment
+-	Take an “exp” dump of the schema of any environment
+
+The script icoadmin uses a key-word called an environment identifier to distinguish between the various environments. The following identifiers are recognized
+
+Environment Identifier	Environment
+int						Integration
+sat						Site Acceptance Testing
+stg						User Acceptance Testing
+dmg						Data Migration
+trg						Training
+int2					Integration II
+sat2					Site Acceptance Testing II
+
+${BOLD}2.1.2.1	Refresh schema of any environment${NORM} 
+Usage: icoadmin deploy <environment identifier> <version>; where <environment identifier> is as defined above. <version> is the version of the iCargo application released.
+
+The script expects the dump and scripts to applied on the schema to be present in the landing location of the environment. The landing location of any environment will be
+/data/landing/<environment identifier>.
+Thus for the Integration Environment II the landing location will be /data/landing/int2.
+
+1.	The dump to be imported should be placed in the location /data/landing/<environment identifier>/dump
+2.	The DML scripts to be executed should be placed in the location /data/landing/<environment identifier>/scripts
+Note : Any scripts already present in this folder should be cleared.
+
+The script does the following
+1.	Take an “exp” dump of the schema.
+-	The dump is available in the location /data/landing/<environment identifier>/archive
+-	The dump file will be named <schema_name>_<ddmonyy>
+2.	Drop all objects in the schema of the environment
+3.	Import the dump in “dump” location of the environment
+-	If multiple “.dmp” files are present in the dump location; the latest will be considered.
+4.	Apply DML scripts present in “scripts” location of the environment
+
+${BOLD}2.1.2.2	Refresh schema of any environment (current exp dump not taken)${NORM}
+Usage: icoadmin deployNoDump <environment identifier> <version>; where <environment identifier> is as defined above. <version> is the version of the iCargo application released.
+The script behaves exactly as above except that Step No 1 as specified above is not done.
+
+${BOLD}2.1.2.3	Apply DML scripts to any environment${NORM}
+Usage: icoadmin scriptsOnly <environment identifier>; where <environment identifier> is as defined above. 
+The DML scripts to be executed should be placed in the location /data/landing/<environment identifier>/scripts
+Note: Any scripts already present in this folder should be cleared.
+${BOLD}2.1.3	Other Scripts${NORM}
+${BOLD}2.1.3.1	Log Clean Script${NORM}
+This script is called cleanme.sh. The script is scheduled to run daily. It does the following
+-	Clean application log files older than 10 days
+-	Clean java core files older than 5 days
+
+${BOLD}2.1.3.2	MQ Queue browse script${NORM}
+Usage: mqget <interface identifier> ;  where <interface identifier> can be any of 
+AMS – Amadeus Incoming
+SCORPION – SCORPION Incoming
+This will browse and display the messages in the incoming queues of the above interfaces.
+${BOLD}2.2	Production Environment${NORM}
+${BOLD}2.2.1	Application Deployment Scripts${NORM}
+The iCargo application deployment script is called “icoadmin”. It can be used for:
+-	deployment of a full iCargo release in WebLogic
+-	deployment of a patch iCargo release in WebLogic
+-	restoring a previous version of iCargo
+-	Verify environment health
+
+A full iCargo release is a release of the application in the form of an application archive and configuration archive. The release will contain the following artefacts for deployment onto WebLogic – icargo.ear and iCargoConfig.zip 
+${BOLD}2.2.1.1	Deployment of a full iCargo release${NORM}
+The following are steps for deployment of a full iCargo release in WebLogic
+1.	Copy icargo.ear and iCargoConfig.zip to the landing location of both partitions (Refer References [2] ) for details.
+The landing location is /data3/landing/ico_app
+2.	Run Deployment script (repeat on both partitions)
+icoadmin deploy <instance name> <icargo version> ; where <instance name> is the WebLogic instance name on the partition. The recognized instance names are
+Instance Name	Hostname of partition	Short name for partition
+ico_wls_P1_ms1	au04uap005qanx2	P1
+ico_wls_P2_ms5	au04uap006qanx2	P2
+
+
+
+
+for eg deploying version 3.04.4.4.1.19 
+icoadmin deploy ico_wls_P1_ms1 3.04.4.4.1.19 and
+icoadmin deploy ico_wls_P2_ms5 3.04.4.4.1.19
+
+Note: The deployment script will explode and deploy the ear and also initiate JSPC for the web-application.
+${BOLD}2.2.1.2	Deployment of a patch iCargo release${NORM}
+The following are steps for deployment of a patch iCargo release in WebLogic
+1.	Copy icargo.ear and iCargoConfig.zip having the patch artefacts to the landing location of both partitions (Refer References [2] ) for details.
+The landing location is /data3/landing/ico_app
+${BOLD}2.	Run Deployment script (repeat on both partitions)${NORM}
+icoadmin patch <instance name> <icargo version> ; where <instance name> is the WebLogic instance name on the partition. The recognized instance names are
+Instance Name	Hostname of partition	Short name for partition
+ico_wls_P1_ms1	au04uap005qanx2	P1
+ico_wls_P2_ms5	au04uap006qanx2	P2
+
+
+
+
+for eg deploying version 3.04.4.4.1.19 
+icoadmin patch ico_wls_P1_ms1 3.04.4.4.1.19 and
+icoadmin patch ico_wls_P2_ms5 3.04.4.4.1.19
+
+Note: The deployment script will explode and deploy the ear.
+
+
+${BOLD}2.2.1.3	Restore a previous version of iCargo${NORM}
+You can restore the last successfully deployed version or any of the previous deployed versions.
+The two methods are
+
+icoadmin restore <instance name> and
+
+icoadmin restoreVersion <instance name> <version>
+
+${BOLD}2.2.1.4	Verify Environment Health
+Usage: icoadmin health <instance name>
+The following statistics are analysed.
+-	WebLogic instance state
+-	GC statistics (using last two verbose GC statistics)
+-	File-system usage
+-	CPU statistics (for a period of 1 minute)
+-	Disk statistics (for a period of 1 minute)
+-	Open File statistics
+-	CLOSE_WAIT statistics
+-	Paging space usage
+
+${BOLD}2.2.1.5	Generate iCargo diagnostic dump${NORM}
+An iCargo diagnostic dump should be generated to provide to support for analysing technical issues encountered with the application. 
+
+Usage: icoadmin icodump <instance name>
+For e.g:- icoadmin icodump ico_wls_P2_ms5
+
+This will generate a dump file with the name <instance_name>_ddMonyy_hh24miss.tar.gz in the location /data1/logs/common
+Note: This dump is deleted automatically after 7 days
+
+${BOLD}2.2.1.6	Enable / Disable / Rotate application logs${NORM}
+${BOLD}Enable Application Logs${NORM}
+This function can be used to enable the application logs dynamically for any WebLogic instance.
+Usage: icoadmin elog <instance name>
+For e.g:- icoadmin elog ico_wls_P2_ms5
+Note: The logs are disabled automatically after 5 minutes
+
+${BOLD}Disable Application Logs${NORM}
+This function can be used to disable the application logs dynamically for any WebLogic instance.
+Usage: icoadmin dlog <instance name>
+For e.g:- icoadmin dlog ico_wls_P2_ms5
+
+${BOLD}Rotate Application Logs${NORM}
+This function can be used to rotate the application logs for any WebLogic instance. (Rotate archives the existing log file with the name <instance_name>.ddMonyy_hh24miss and provides fresh log file for the logging)
+Usage: icoadmin rotate <instance name>
+For e.g:- icoadmin rotate ico_wls_P2_ms5
+Note: Aliases have been defined to ease the step of rotating logs. The following aliases are defined
+On au04uap005qanx2
+rotate1 – rotate logs for ico_wls_P1_ms1
+rotate2 – rotate logs for ico_wls_P1_ms2
+On au04uap006qanx2
+rotate5 – rotate logs for ico_wls_P2_ms5
+rotate6 – rotate logs for ico_wls_P2_ms6
+
+${BOLD}Tips for obtaining controlled logs${NORM}
+There is usually the need for obtaining logs for a specific transaction for a specific scenario. Tracing the specific scenarios logs from the full log files may be tedious. The following steps can be used to ease the process of obtaining logs
+1.	Identify a specific instance to connect to
+2.	Enable logs on this instance using icoadmin elog <instance_name>
+3.	Rotate the logs for this instance using icoadmin rotate <instance_name> or the corresponding alias
+4.	Execute the transaction
+5.	Rotate logs again for this instance using icoadmin rotate <instance_name> or the corresponding alias
+For e.g let us consider the steps required to obtain the logs for the “Save Booking” transaction on instance ico_wls_P1_ms1
+1.	Connect to ico_wls_P1_ms1 and take the “Create Booking” Screen. Fill in all attributes in the screen, with the only step remaining being the save
+2.	On au04uap005qanx2 type:
+3.	icoadmin elog ico_wls_P1_ms1
+4.	rotate1
+5.	Execute the save transaction
+6.	Once save is complete
+7.	rotate1
+8.	dprdlog
+This will take you to the location having the log files namely /data1/domains/icoprddomain/logs/wls
+9.	ls –lt ico_wls_P1_ms1*.out* | more
+10.	The first file listed with the name ico_wls_P1_ms1.out.ddMonyy_hh24miss will be file having the logs
+
+${BOLD}2.2.1.7	Expire users on any instance${NORM}
+This function can be used to expire the HTTP sessions of users on any instance (When the HTTP session is expired the user will be logged out. Hence use this function with caution)
+Usage: icoadmin expire <instance name>
+Note: You can specify “all” as the instance name to expire users from all instances
+
+${BOLD}2.2.1.8	Additional functions${NORM}
+Script icoadmin supports the following additional functions
+
+${BOLD}Trigger JSPC${NORM}
+This function can be used to initiate JSPC for the WebLogic instance
+Usage: icoadmin jspc <instance name>
+
+${BOLD}Query iCargo version deployed${NORM}
+This function displays the currently deployed version of iCargo
+Usage: icoadmin version <instance name>
+
+${BOLD}Query Deployment history${NORM}
+This function displays a log of the recorded deployment activities on the environment
+Usage: icoadmin history <instance name>
+
+${BOLD}Query WebLogic monitoring statistics for any instance${NORM}
+This function will query WebLogic monitoring statistics for any instance
+Usage: icoadmin stats <instance name>
+Note: You can specify “all” as the instance name to get statistics from all instances
+
+The following statistics are queried
+-	Active Since
+-	JDBC Service Health
+o	ActiveConnectionsHighCoun
+o	WaitingForConnectionCurrentCount
+o	WaitingForConnectionHighCount
+o	CurrCapacity
+-	JMS Service Health  - EAI/Other
+-	JTA Runtime  - Stats
+o	TransactionAbandonedTotalCount 
+o	TransactionRolledBackResourceTotalCount 
+o	TransactionRolledBackTimeoutTotalCount 
+-	File Store Health  - EAI/Other
+${BOLD}2.2.2	Interface Life-Cycle Scripts${NORM}
+The interface control script is called “icointf”. It can be used for 
+-	Suspend/Resume interfaces
+-	Pinned Interface Migration/Fail-back 
+-	JMS Server Migration
+
+The interfaces are identified using keywords to distinguish the interface. The following interfaces are recognized
+
+Interface Identifier	Interface
+OGS						OGS Incoming
+SCORPION				SCORPION Incoming
+AMSIN					1AMQ Incoming
+AMSOUT					1AMQ Outgoing
+
+${BOLD}2.2.2.1	Suspend/Resume Interfaces${NORM}
+The following interfaces can be suspended /resumed
+-	SCORPION incoming
+-	1AMQ Incoming
+-	1AMQ Outgoing
+
+${BOLD}To suspend an interface ${NORM}
+Usage: icointf suspend <Interface Identifier>; where <Interface Identifier> is as defined above.
+For e.g: to suspend the incoming SCORPION interface
+icointf suspend SCORPION
+
+${BOLD}To resume an interface ${NORM}
+Usage: icointf resume <Interface Identifier>; where <Interface Identifier> is as defined above.
+For e.g: to resume the suspended incoming SCORPION interface
+icointf resume SCORPION
+
+${BOLD}2.2.2.2	Pinned Interface Migration/Fail-back${NORM}
+The interfaces SCORPION and OGS are pinned to a server in a cluster-wide deployment to avoid out of sequence processing of messages. Thus the SCOPRION interface is pinned to server ico_wls_P1_ms1 and the OGS interface to ico_wls_P2_ms5. 
+Refer References [2] ; Section 2.9.4 for details.
+
+${BOLD}To migrate a pinned interface${NORM}
+Usage: icointf migrate <Interface Identifier>; where <Interface Identifier> can be any of 
+-	SCORPION
+-	OGS
+For e.g  to migrate pinned SCORPION interface
+icointf migrate SCORPION
+
+${BOLD}To fail-back a migrated pinned interface ${NORM}
+Usage: icointf failback <Interface Identifier>; where <Interface Identifier> can be any of 
+-	SCORPION
+-	OGS
+
+For e.g  to fail-back migrated SCORPION interface
+icointf failback SCORPION
+
+Note: The above procedure of migration/fail-back is required only when the server hosting a pinned interface is brought down for any reason and cannot be brought up immediately. (For e.g: hardware faults to the partition hosting the server which may require a considerable outage to rectify. As a rule of thumb perform this step only if the outage exceeds 12 hours) 
+${BOLD}2.2.2.3	JMS Server Migration/Fail-back${NORM}
+To migrate the JMS server of any failed WebLogic instance to a surviving instance. This function expects the WebLogic instance name as a parameter. WebLogic instance names are identified using short-names as defined below.
+
+Instance Identifier	WebLogic instance name
+ms1					ico_wls_P1_ms1
+ms5					ico_wls_P2_ms5
+
+${BOLD}To migrate a JMS Server${NORM}
+icointf jmsmigrate <primary instance> <secondary instance> ; where <primary instance>, <secondary instance> can be any of the instance identifiers defined above.
+For .e.g to migrate the JMS Server of ico_wls_P1_ms1 to ico_wls_P2_ms5
+icointf jmsmigrate ms1 ms5
+
+Note: Make sure that any pinned interfaces on the WebLogic instance being migrated are already migrated (Section 9) before performing JMS server migration
+
+${BOLD}To fail-back a migrated JMS Server${NORM}
+icointf jmsfailback <primary instance> ; where <primary instance> can be any of the instance identifiers defined above
+For .e.g to migrate the migrated JMS Server of ico_wls_P1_ms1 back to ico_wls_P1_ms1
+icointf jmsfailback ms1
+
+${BOLD}2.2.2.4	Additional Functions${NORM}
+The following additional functions are also supported
+
+${BOLD}Suspend all incoming Interfaces${NORM}
+icointf suspendall
+
+${BOLD}Resume all Suspended Interfaces${NORM}
+icointf resumeall
+
+${BOLD}Compact all JMS Stores${NORM}
+icointf compactall
+${BOLD}2.2.3	Other Scripts${NORM}
+${BOLD}2.2.3.1	Log Clean Script${NORM}
+This script is called cleanme.sh. The script is scheduled to run daily. It does the following
+-	Clean application log files older than 10 days
+-	Clean java core files older than 5 days
+-	Clean CXF log files (SOAP messages) older than 6 hours
+-	Clean nmon logs (performance statistics) older than 15 days
+
+${BOLD}2.2.3.2	MQ Queue browse script${NORM}
+Usage: mqget  <interface identifier>; where <interface identifier> can be any of 
+AMS – Amadeus Incoming
+SCORPION – SCORPION Incoming
+This will browse and display the messages in the incoming queues of the above interfaces.
+
+${BOLD}2.2.4	Database monitoring scripts${NORM}
+The database monitoring scripts are located in the location au04udb021qanx2:/data/landing/common/sql/other. This can be accessed using the alias “icob”
+
+The following other aliases are also defined for ease of use:
+1.	sqlowr – start a Sql plus session logged in as user ICO_OWR (The schema having the iCargo tables)
+2.	sqldba - start a Sql plus session logged in as user ICO_DBA (The user having the DBA privilege)
+3.	sqldba1 - start a Sql plus session logged in as user ICO_DBA on instance dtxnp11
+4.	sqldba2 - start a Sql plus session logged in as user ICO_DBA on instance dtxnp12
+5.	awr1 – generate an AWR report for instance dtxnp11
+6.	awr2 - generate an AWR report for instance dtxnp12
+7.	sqlpub - start a Sql plus session logged in as user ICO_DWH_STG_PUB on instance ddwhp1 (The publisher schema for Oracle CDC – has the change tables)
+8.	sqlsub - start a Sql plus session logged in as user ICO_DWH_STG_SUB on instance ddwhp1 (The subscriber schema for Oracle CDC – has the subscription views)
+
+Scripts are available in the location defined by alias “icob” for the following
+
+${BOLD}Find DB locks held - findLocks2.sql${NORM}
+Usage: 
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqldba1
+SQL>@ findLocks2.sql
+Note: The script has to be executed as sqldba1 and sqldba2
+
+${BOLD}Find Active sessions - findLocks2.sql${NORM}
+Usage: 
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqldba1
+SQL>@ findActiveSessions.sql
+Note: The script has to be executed as sqldba1 and sqldba2
+
+${BOLD}Check status of CDC${NORM}
+Usage: 
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqlpub
+SQL>@ findcdcstatus.sql
+CAPTURE_NAME              STATE                               TOTAL_MESSAGES_CAPTURED
+------------------------- ----------------------------------- -----------------------
+CDC$C_ICOQF_PRD1_SET      CAPTURING CHANGES                                  39865337
+
+APPLY ST
+--------
+ENABLED
+
+CAPTURE
+--------
+ENABLED
+
+${BOLD}Check Tablespace space usage${NORM}
+Usage: 
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqldba
+SQL>@ free.sql
+
+${BOLD}Find status of last 25 DBMS_JOB executions (All Jobs)${NORM}
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqlowr
+SQL>@ last25JobRunDetails.sql
+
+${BOLD}Find status of last 25 iCargo Job Scheduler job executions (All Jobs)${NORM}
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqlowr
+SQL>@ last25process.sql
+
+${BOLD}Find status of last 25 iCargo Job Scheduler job executions (Specific job id)${NORM}
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqlowr
+SQL>@ last25processForJob.sql
+
+${BOLD}Find status of last 25 iCargo Job Scheduler job executions (Specific Job Name)${NORM}
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqlowr
+SQL>@ last25processForJobDes.sql
+
+${BOLD}Find status of Mail Tracking DBMS_JOB${NORM}
+au04udb021qanx2:/home/icprdorc$icob
+au04udb021qanx2:/data/landing/common/sql/other$sqlowr
+SQL>@ jobdetails.sql
+
+${BOLD}3	Script Maintenance${NORM}
+${BOLD}3.1	Locations${NORM}
+Partition*1	Location
+Development – App Server	/data/domains/common/scripts/wls
+Development – DB	/data/landing/common/scripts
+Production – App Servers	/data1/domains/common/scripts/wls
+Production – DB Server	/data/landing/common/sql/other
+
+*1 - Refer [2] for physical details
+Note: An alias “icob” has been defined to the respective script locations on the relevant partitions. This alias has been defined for users “icadm/icorcl” on Development App /DB servers respectively and for users “icprdadm/icprdorc” on Production/Production Support App/DB servers respectively.
+ 
+
+${BOLD}3.2	Maintenance${NORM}
+${BOLD}3.2.1	Script – icoadmin${NORM}
+The script uses a set of configuration files for its functions.
+${BOLD}1.	env.properties${NORM}
+Location: /data/domains/common/scripts/wls for the development environment and data1/domains/common/scripts/wls/store for the production environment
+Use: Specifies the WebLogic domain/instance details for the environments on the partition
+
+The format of the file is
+[Domain/Instance Name] [Domain Directory] [Context Path] [Instance Name] [Initial Context URL] [Description 1] [Description 2] [Domain/instance password]
+A sample entry for WebLogic instance ico_wls_P1_ms1 for Production is as below
+ 
+
+${BOLD}2.	common-config.txt & common-config.properties${NORM}
+Location: /data/domains/common/scripts/wls/store for the development environment and data1/domains/common/scripts/wls/store for the production environment
+Use: Specifies templates for the environment specific iCargo configuration files
+common-config.txt  specifies templates for 4 configuration files viz serverproperties.xml, serverconfig.xml, logger.xml & loggerprovider.properties. The file has markers for configuration values that change per environment
+ 
+
+
+For e.g in the snippet shown above the markers #HOST# & #PORT# will be replaced with values relevant to the environment. The values are obtained from env.properties
+
+common-config.poperties specifies the name of the iCargo configuration file and start and end lines in common-config.txt that makes up the content of the iCargo configuration file.
+
+ 
+
+${BOLD}3.	Templates for configuration files – crystalclear.properties,oscache.properties${NORM}
+Location: /data/domains/common/scripts/wls/store for the development environment and /data1/domains/common/scripts/wls/store for the production environment
+Use: These files are replaced in the “iCargoConfig” directory on deployment using the script. Markers in the template are changed to values relevant to the environment
+
+The location in the iCargo application where these files are to be coped to is specified in the file file-name-config.properties
+ 
+
+${BOLD}4.	Static configuration files - boot.properties, ,reports-config.properties,weblogic.xml${NORM}
+Location: /data/domains/common/scripts/wls/store for the development environment and data1/domains/common/scripts/wls/store  for the production environment
+Use: These files are replaced in the “iCargoConfig” directory on deployment using the script
+
+The location in the iCargo application where these files are to be coped to is specified in the file file-name-config.properties
+
+${BOLD}3.2.2	Script – icointf${NORM}
+The script uses a set of configuration files for its functions.
+${BOLD}1.	servers.properties${NORM}
+Location: /data/domains/common/scripts/wls/store for the development environment and data1/domains/common/scripts/wls/store for the production environment
+Use: Contains short name aliases for WebLogic instances
+ 
+
+${BOLD}2.	pinned.properties${NORM}
+Location: /data/domains/common/scripts/wls/store for the development environment and data1/domains/common/scripts/wls/store for the production environment
+Use: Contains the pinned interface details
+The format of the file is 
+[Interface Name] [Primary Server(Short Name)] [Secondary Server(Short Name)] [MDB Jar Name] [MDB Name]
+
+The example below shows a sample entry for the OGS interface. The MDB is the first MDB that receives the message
+ 
+
+${BOLD}3.	icointf.properties${NORM}
+Location: /data/domains/common/scripts/wls/store for the development environment and data1/domains/common/scripts/wls/store for the production environment
+Use: Contains the mapping from the alias name used for the interface in the script to its relevant details like queue name, MDB name, MDB jar name etc
+The format of the file is
+[Interface Name] [IN/OUT] [JMS Module Name] [JMS Q Name] [MDB Name] [MDB Jar Name] [Server List(Short Names)]
+
+An example snippet is as below
+ 
+
+${BOLD}4.	jms.properties${NORM}
+Location: /data/domains/common/scripts/wls/store for the development environment and data1/domains/common/scripts/wls/store for the production environment
+Use: Contains the JMS server name on each WebLogic instance
+
+${BOLD}The format of the file is${NORM}
+[Short Server Name] [JMS Server Name] [Store Dir]
+
+An example snippet is shown below
+ 
+
+${BOLD}3.2.3	Script cleanme.sh${NORM}
+Location: /data/domains/common/scripts/wls/ for the development environment and data1/domains/common/scripts/wls for the production environment
+The script declares a set of four parameters to define the retention period of logs for the following
+-	Application Logs
+-	Java Core Files
+-	nmon logs
+-	CXF logs
+The following snippet shows the parameter definitions in the script
+ 
+
+export BOLD="\033[1m"
+export NORM="\033[0m"

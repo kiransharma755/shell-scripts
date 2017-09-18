@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<!-- Server Configurations  -->
+
+<map>
+  <map-item name="SERVER_TIME_OFFSET" value = "-240"/>
+  <map-item name="ROOT_USER" value="cn = Directory Manager" />
+  <map-item name="ROOT_PASSWORD" value="weblogic" />
+  <map-item name="SERVER_STATION" value="IAD" />
+</map>
+
+
+
+

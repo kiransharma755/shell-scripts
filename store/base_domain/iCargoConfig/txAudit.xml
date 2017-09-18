@@ -1,0 +1,100 @@
+<txConfig isEnabled="true">
+	
+	<handlers>
+	
+		<handler name="JmsHandler"
+			handlerClass="com.ibsplc.xibase.server.framework.tx.audit.handler.jms.JMSAuditHandler"
+			isEnabled="false">
+			<txConfigs>
+				<txType type="SYE" filter="include">
+					<values>ALL</values>
+				</txType>
+				<txType type="BSE" filter="include">
+					<values>NONE</values>
+				</txType>
+				<txType type="RTE" filter="include">
+					<values>ALL</values>
+				</txType>
+				<txType type="NRM" filter="include">
+					<values>NONE</values>
+				</txType>
+			</txConfigs>
+			<map>
+				<entry>
+					<string>jmsQueue</string>
+					<string>TX_AUDIT_QUEUE</string>
+				</entry>
+				<entry>
+					<string>flushSize</string>
+					<string>5</string>
+				</entry>
+				<entry>
+					<string>exceptionMaxLenth</string>
+					<string>3000</string>
+				</entry>
+				<entry>
+					<string>requestTypes</string>
+					<string>ASYNC_REQ,JOBSCH_REQ,WEB_REQ,WEBSERVICE_REQ</string>
+				</entry>
+			</map>
+		</handler>
+		<!--<handler name="ConsoleHandler"
+			handlerClass="com.ibsplc.xibase.server.framework.tx.audit.handler.console.ConsoleAuditHandler"
+			isEnabled="true">
+			<txConfigs>
+				<txType type="SYE" filter="include">
+					<values>ALL</values>
+				</txType>
+				<txType type="BSE" filter="include">
+					<values>NONE</values>
+				</txType>
+				<txType type="RTE" filter="include">
+					<values>ALL</values>
+				</txType>
+				<txType type="NRM" filter="include">
+					<values>NONE</values>
+				</txType>
+			</txConfigs>
+			<map>
+				<entry>
+					<string>isNotificationLoggingEnabled</string>
+					<string>false</string>
+				</entry>
+				<entry>
+					<string>exceptionMaxLength</string>
+					<string>3000</string>
+				</entry>
+			</map>
+		</handler>-->
+		
+		<!-- Handler used for logging System Error using ERMA -->
+		<handler name="SystemErrorERMAMonitoringHandler" handlerClass="com.ibsplc.xibase.server.framework.tx.audit.handler.erma.SystemErrorERMAMonitoringHandler" isEnabled="false">
+				<txConfigs>
+					<txType type="SYE" filter="include">
+						<values>ALL</values>
+					</txType>
+					<txType type="BSE" filter="include">
+						<values>NONE</values>
+					</txType>
+					<txType type="RTE" filter="include">
+						<values>ALL</values>
+					</txType>
+					<txType type="NRM" filter="include">
+						<values>NONE</values>
+					</txType>
+				</txConfigs>	
+				<map>
+					<entry>
+						<string>isNotificationLoggingEnabled</string>
+						<string>true</string>
+					</entry>
+					<entry>
+						<string>exceptionMaxLength</string>
+						<string>3000</string>
+					</entry>
+				</map>
+		</handler>
+		
+	</handlers>
+	
+</txConfig>

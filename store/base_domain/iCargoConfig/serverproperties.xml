@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Server:Services xmlns:Server="http://www.ibsplc.com/ejb/serverproperties/">
+    <Server:Service>
+        <Server:ServerName>Weblogic</Server:ServerName>
+        <Server:ServerType>Weblogic700</Server:ServerType>
+        <Server:ServerId>localhost</Server:ServerId>
+        <Server:ListenPort>6003</Server:ListenPort>
+        <!-- For Weblogic, initial context factory class will be weblogic.jndi.WLInitialContextFactory-->
+		<!-- For Websphere,initial context factory class will be com.ibm.websphere.naming.WsnInitialContextFactory-->
+        <Server:InitialContextFactory>weblogic.jndi.WLInitialContextFactory</Server:InitialContextFactory>
+        <!-- For Weblogic, protocol will be t3-->
+		<!-- For Websphere, protocol will be iiop-->
+        <Server:Protocol>t3</Server:Protocol>
+
+    </Server:Service>
+
+</Server:Services>

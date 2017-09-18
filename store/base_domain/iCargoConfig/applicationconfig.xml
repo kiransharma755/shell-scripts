@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<map>
+<!-- Hosted Companies -->
+<map-item name="hostedCompanies" value="TK"/>
+
+<!-- Client Configurations  -->
+    <map-item name="clientContextResolver" value="com.ibsplc.xibase.client.framework.context.DefaultClientContextResolver" />
+  <map-item name="applicationSessionProvider" value = "com.ibsplc.icargo.framework.session.ApplicationSessionImpl"/>
+
+  <!-- added for portlet -->
+    <map-item name="portletApplicationSessionProvider" value = "com.ibsplc.icargo.framework.portal.session.portlet.ApplicationSessionImpl"/>
+
+
+<!-- Application Configurations  -->
+
+  <!--	Comment this element for stand-alone operation -->
+  <!-- Remove the entry ICargoTxAuditManager from this list if u want to disable txn Audit -->
+  <!--Removed com.ibsplc.icargo.framework.tx.log.ICargoTxAuditManager for ICRD-5072-->
+  <map-item name="pluggablemanagers" value = "com.ibsplc.icargo.framework.security.SecurityManager,com.ibsplc.xibase.server.framework.persistence.tx.TransactionManager,com.ibsplc.xibase.server.framework.audit.manager.AuditTxManager,com.ibsplc.xibase.server.framework.persistence.lock.manager.ImplicitLockManager,com.ibsplc.xibase.server.framework.event.manager.EventTxManager"/>
+
+  <!--	Comment this element for non stand-alone operation with action privilege checks also-->
+  <!--map-item name="pluggablemanagers" value = "com.ibsplc.icargo.framework.security.SecurityManager,com.ibsplc.xibase.server.framework.persistence.tx.TransactionManager,com.ibsplc.xibase.server.framework.audit.manager.AuditTxManager,com.ibsplc.icargo.framework.security.PrivilegeManager,,com.ibsplc.xibase.server.framework.persistence.lock.manager.ImplicitLockManager"/-->
+
+  <!--	Uncomment this element for non stand-alone operation with action privilege and console monitor checks also-->
+  <!--map-item name="pluggablemanagers" value = "com.ibsplc.icargo.framework.security.SecurityManager,com.ibsplc.xibase.server.framework.persistence.tx.TransactionManager,com.ibsplc.xibase.server.framework.audit.manager.AuditTxManager,com.ibsplc.icargo.framework.security.PrivilegeManager,com.ibsplc.xibase.server.framework.tx.monitor.TxMonitorManager,,com.ibsplc.xibase.server.framework.persistence.lock.manager.ImplicitLockManager"/-->
+
+  <!--	Uncomment this element for stand-alone operation with audit and privlege checks -->
+  <!--<map-item name="pluggablemanagers" value = "com.ibsplc.icargo.framework.security.DummySecurityTxManager,com.ibsplc.xibase.server.framework.persistence.tx.TransactionManager,com.ibsplc.xibase.server.framework.audit.manager.AuditTxManager,com.ibsplc.icargo.framework.security.PrivilegeManager,,com.ibsplc.xibase.server.framework.persistence.lock.manager.ImplicitLockManager"/>
+  -->
+
+  <!--	Uncomment this element for stand-alone operation without audit and privlege checks -->
+  <!--<map-item name="pluggablemanagers" value = "com.ibsplc.icargo.framework.security.DummySecurityTxManager,com.ibsplc.xibase.server.framework.persistence.tx.TransactionManager,,com.ibsplc.xibase.server.framework.persistence.lock.manager.ImplicitLockManager"/>
+  -->
+
+  <map-item name="requestContextResolver" value="com.ibsplc.xibase.server.framework.frontcontroller.context.ThreadLocalResolver" />
+
+  <!--	Comment this element for stand-alone operation -->
+  <map-item name="securityContextResolver" value="com.ibsplc.icargo.framework.security.context.CachedSecurityContextResolver" />
+
+  <!--	Uncomment this element for stand-alone operation -->
+  <!--<map-item name="securityContextResolver" value="com.ibsplc.xibase.server.framework.security.context.ThreadLocalResolver" />
+  -->
+
+  <!-- If set to true MessageVO's will have the stack trace of its point of creation -->
+  <map-item name="stackTraceRequired" value="false" />
+
+  <!-- Disables AbstractVO#toString() -->
+  <map-item name="disableVOtoString" value="true" />
+
+  <map-item name="securityProvider" value = "com.ibsplc.icargo.framework.security.ApplicationSecurityProvider"/>
+
+
+  <map-item name="rulesServiceProvider" value="com.ibsplc.xibase.server.framework.rules.provider.impl.DroolsServiceImpl"/>
+  <!-- Add this entry to the list comma separated to enable ERMA monitoring com.ibsplc.xibase.server.framework.monitoring.erma.MonitorInitializer -->
+  <map-item name="initializers" value = "com.ibsplc.xibase.server.framework.config.MBeanInitializer,com.ibsplc.xibase.server.framework.util.log.SystemOutRedirectInitializer,com.ibsplc.xibase.server.framework.util.log.SystemErrorRedirectInitializer,com.ibsplc.icargo.framework.config.GroupingInitializer,com.ibsplc.icargo.framework.config.ICargoConfigInitializer,com.ibsplc.icargo.framework.config.RuleServiceInitializer,com.ibsplc.xibase.server.framework.util.dynamicsearch.DynamicSearchUtil"/>
+
+
+
+  <map-item name="authenticatorResolver" value = "com.ibsplc.icargo.framework.config.resolvers.security.AuthenticatorResolver"/>
+  <map-item name="authoriserResolver" value = "com.ibsplc.icargo.framework.config.resolvers.security.AuthoriserResolver"/>
+  <map-item name="privilegeResolver" value = "com.ibsplc.icargo.framework.config.resolvers.security.ActionPrivilegeResolver"/>
+
+
+  <!-- Default Configuration Resolvers -->
+  <!--map-item name="entityMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.persistence.hibernate.entity.DefaultEntityResolver"/>
+  <map-item name="daoMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.persistence.query.DefaultDAOResolver"/>
+  <map-item name="queryXMLMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.persistence.query.DefaultQueryXMLResolver"/>
+  <map-item name="queryMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.persistence.query.sql.DefaultQueryResolver"/>
+  <map-item name="procedureMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.persistence.query.sql.DefaultProcedureResolver"/>
+  <map-item name="requestMappingsXMLConfigResolver" value = "com.ibsplc.xibase.server.framework.requestprocessor.DefaultRequestXMLMappingResolver"/>
+  <map-item name="actionMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.requestprocessor.DefaultActionMappingResolver"/>
+  <map-item name="serviceNameConfigResolver" value = "com.ibsplc.xibase.server.framework.requestprocessor.DefaultServiceNameResolver"/>
+  <map-item name="serviceLocatorResolver" value = "com.ibsplc.xibase.server.framework.services.DefaultServiceLocatorResolver"/>
+  <map-item name="actionMappingResolver" value = "com.ibsplc.icargo.framework.struts.action.DefaultActionMappingResolver"/>
+  <map-item name="sessionMappingResolver" value = "com.ibsplc.icargo.framework.session.config.DefaultSessionMappingResolver"/-->
+
+
+  <!-- MBean Configuration Resolvers -->
+   <map-item name="entityMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.entities.EntityResolver"/>
+   <map-item name="daoMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.query.DAOResolver"/>
+   <map-item name="queryXMLMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.query.QueryXMLResolver"/>
+   <map-item name="queryMappingsConfigResolver" value =  "com.ibsplc.xibase.server.framework.config.resolvers.query.QueryResolver"/>
+   <map-item name="procedureMappingsConfigResolver" value= "com.ibsplc.xibase.server.framework.config.resolvers.query.ProcedureResolver"/>
+   <map-item name="requestMappingsXMLConfigResolver" value= "com.ibsplc.xibase.server.framework.config.resolvers.requestmapping.RequestMappingXMLResolver"/>
+   <map-item name="actionMappingsConfigResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.requestmapping.ActionMappingResolver"/>
+   <map-item name="serviceNameConfigResolver" value =  "com.ibsplc.xibase.server.framework.config.resolvers.requestmapping.ServiceNameResolver"/>
+   <map-item name="serviceLocatorResolver" value =  "com.ibsplc.xibase.server.framework.config.resolvers.services.ServiceLocatorResolver"/>
+   <map-item name="actionMappingResolver" value = "com.ibsplc.icargo.framework.config.resolvers.command.xml.ActionMappingResolver"/>
+   <map-item name="sessionMappingResolver" value = "com.ibsplc.icargo.framework.config.resolvers.session.xml.ScreenSessionMappingResolver"/>
+   <map-item name="applicationSessionMappingResolver" value = "com.ibsplc.icargo.framework.config.resolvers.session.ApplicationSessionMappingResolver"/>
+
+	<!-- added for charts -->
+
+   <map-item name="chartMappingResolver" value = "com.ibsplc.icargo.framework.chart.config.resolvers.xml.ChartMappingResolver"/>
+
+
+   <!-- added for portlet -->
+   <map-item name="portletSessionMappingResolver" value = "com.ibsplc.icargo.framework.portal.config.resolvers.portlet.session.ScreenSessionMappingResolver"/>
+   <map-item name="portletApplicationSessionMappingResolver" value = "com.ibsplc.icargo.framework.portal.config.resolvers.portlet.session.ApplicationSessionMappingResolver"/>
+
+   <!-- for ERMA Monitoring -->
+
+   <map-item name="serverRuntimeResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.monitoring.ServerRuntimeNameResolver"/>
+   <map-item name="serverJMXPortResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.monitoring.ServerJMXPortResolver"/>
+   <map-item name="serverIPResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.monitoring.ServerIpResolver"/>
+   <map-item name="jmsServerNameResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.monitoring.JMSServerNameResolver"/>
+
+   <!-- for ERMA Monitoring -->
+
+   <map-item name="normalReportMappingResolver" value = "com.ibsplc.icargo.framework.config.resolvers.report.xml.ReportMappingResolver"/>
+   <map-item name="reportTypeResolver" value = "com.ibsplc.icargo.framework.report.resolver.impl.DefaultReportTypeResolver"/>
+   <map-item name="reportServerContext" value = "http://N7167:7001/icargo"/>
+   <map-item name="clientLoginProvider" value = "com.ibsplc.xibase.server.framework.security.client.login.impl.weblogic.JAASLogin"/>
+   <map-item name="privilegedUserProvider" value = "com.ibsplc.icargo.framework.security.client.user.FileUserProvider"/>
+   <!-- Indicates if this configuration is for an application that is like a client to the iCargo server -->
+   <!-- Make this true for an application client -->
+   <map-item name="isAppClient" value = "false"/>
+   <!-- If app client the security provider to be used-->
+   <map-item name="appClientSecurityProvider" value = "com.ibsplc.icargo.framework.security.client.ApplicationClientSecurityProvider"/>
+   <map-item name="auditProcessor" value = "com.ibsplc.icargo.framework.audit.processor.AuditProcessorImpl"/>
+   <map-item name="uploadDataParsers" value="mailtracking.defaults:com.ibsplc.icargo.presentation.upload.parser.mailtracking.defaults.MailTrackingDefaultsParser,domesticmail.mailoperations:com.ibsplc.icargo.presentation.upload.parser.domesticmail.mailoperations.DomesticMailOperationsParser"/>
+
+   	<!-- Added for websphere migration starts -->
+
+   	<!-- This attribute indicates the application server used for the application. Values can be WEBSPHERE, WEBLOGIC, JBOSS -->
+   	<map-item name="appServer" value = "WEBLOGIC"/>
+
+   	<!--  The attribute used for registering all MBEANs in the application server -->
+   	<!--  If appServer is WEBSPHERE value should be com.ibsplc.xibase.server.framework.config.resolvers.mbs.was.WASMBeanServerResolver -->
+   	<!--  For any other appServer value should be com.ibsplc.xibase.server.framework.config.resolvers.mbs.DefaultMBeanServerResolver -->
+   	<map-item name="mBeanResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.mbs.DefaultMBeanServerResolver"/>
+   	<!--  The attribute used for retrieving the iCARGO Principal depending on the App Server -->
+   	<!--  If appServer is WEBSPHERE value should be com.ibsplc.xibase.server.framework.config.resolvers.security.was.WASSubjectResolver -->
+   	<!--  For WEBLOGIC appServer value should be com.ibsplc.xibase.server.framework.config.resolvers.security.wls.WLSSubjectResolver -->
+   	<map-item name="subjectResolver" value = "com.ibsplc.xibase.server.framework.config.resolvers.security.wls.WLSSubjectResolver"/>
+   	<!-- This would be invoked only if appServer is WEBSPHERE  -->
+   	<map-item name="duplicateSessionIdResolver" value = "com.ibsplc.icargo.framework.config.resolvers.security.was.DuplicateSessionIDResolver"/>
+	<!-- The attribute used for resolving the listener for auto refresh topic -->
+	<map-item name="refreshListener" value = "com.ibsplc.icargo.framework.refresh.listener.AbstractMessageListener"/>
+
+	<!-- Added for websphere migration ends-->
+
+	<!-- Added for reports -->
+
+	<!-- If a HTTP proxy or load balancer is configured for the server, specify the value as true, Otherwise false -->
+	<map-item name="hasProxy" value="true"/>
+
+	<!-- Specify the URL that is used to access proxy or load balancer -->
+	<map-item name="proxyURL" value="http://10.109.65.75/icargo"/>
+	<!-- Added for reports -->
+
+	<map-item name="passwordPolicyResolver" value = "com.ibsplc.icargo.framework.config.resolvers.security.PasswordPolicyResolver"/>
+	<map-item name="isTxnBlockingRequired" value = "false"/>
+	<map-item name="blockedTransactionsResolver" value = "com.ibsplc.icargo.framework.config.resolvers.tx.block.TxBlockResolver"/>
+	<map-item name="isClusterConfiguration" value = "false"/>
+
+	<map-item name="cache.provider" value = "com.ibsplc.xibase.server.framework.cache.impl.EHCacheSpiImpl"/>
+	<map-item name="pageEagerLoadCacheCount" value="3"/>
+	<map-item name="disabledModules" value=""/>
+    <map-item name="asyncDatabasePoolEnabled" value = "true"/>
+
+    <map-item name="eventMapperResolver" value="com.ibsplc.icargo.framework.event.resolver.DefaultEventMapperResolver"/>
+	<map-item name="eventChannelResolver" value="com.ibsplc.icargo.framework.event.resolver.DefaultChannelResolver"/>
+
+</map>

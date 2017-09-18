@@ -1,0 +1,12 @@
+<properties>
+	<parameter name="isTxMonitoring">
+			<name>isTxMonitoring</name>
+			<value>false</value>
+	</parameter>
+
+	<parameter name="monitorFrequency">
+			<name>monitorFrequency</name>
+			<value>5</value>
+	</parameter>
+
+</properties>

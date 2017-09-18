@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<properties>
+
+	<parameter name="startJobScheduler">
+			<name>startJobScheduler</name>
+			<value>false</value>
+	</parameter>
+
+	<!-- Timer Implementation -->
+	<parameter name="timerImplementation">
+		<name>timerImplementation</name>
+		<value>com.ibsplc.xibase.server.jobscheduler.business.timer.JMXTimer</value>
+	</parameter>
+
+	<parameter name="scanFrequency">
+		<name>scanFrequency</name>
+		<value>300</value>
+	</parameter>
+
+	<parameter name="executeMissedOccurrances">
+		<name>executeMissedOccurrances</name>
+		<value>false</value>
+	</parameter>
+
+	<parameter name="shutDownDelay">
+		<name>shutDownDelay</name>
+		<value>2</value>
+	</parameter>
+
+
+</properties>
+
