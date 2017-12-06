@@ -3,3 +3,11 @@
 tmp/
 
 nmon*
+
+etc/
+
+# ignore symlink
+wladmin
+icoadmin
+txpadmin
+

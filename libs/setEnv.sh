@@ -6,10 +6,10 @@
 #
 #set -x
 
-export JAVA_HOME="/cellone/jdk1.7.0_75"
+#export JAVA_HOME="/cellone/jdk1.7.0_75"
 #export BEA_HOME="/home/bea/bea12/weblogic12"
-export WLADM_WL_HOME="/cellone/Oracle/Middleware/Oracle_Home/wlserver"
-export ANT_HOME="/cellone/Oracle/Middleware/Oracle_Home/oracle_common/modules/org.apache.ant_1.9.2"
+export WLADM_WL_HOME='/opt/bea1223/wlserver'
+export ANT_HOME='/opt/bea1223/oracle_common/modules/thirdparty/org.apache.ant/1.9.8.0.0/apache-ant-1.9.8'
 # set the weblogic env 
 . ${WLADM_WL_HOME}/server/bin/setWLSEnv.sh > /dev/null 2>&1
 
@@ -17,7 +17,7 @@ export ANT_HOME="/cellone/Oracle/Middleware/Oracle_Home/oracle_common/modules/or
 ENABLE_REMOTE_DISPATCH="true"
 
 # enable piped out log file
-ENABLE_PIPED_LOG="true"
+ENABLE_PIPED_LOG="false"
 
 # enable shell colors
 ENABLE_COLOR="true"
@@ -58,11 +58,11 @@ STARTUP_DELAY=5
 
 # common entries for icoadmin starts
 # Root directory for log of all environments. Domain specific folders will build from here
-ROOT_LOG_DIR=/cellone/logs
+ROOT_LOG_DIR='/Users/jens/work/ico_root/logs'
 
 # Root landing directory. Domain specific folders will build from here
-ROOT_LANDING_DIR=/cellone/landing
+ROOT_LANDING_DIR='/Users/jens/work/ico_root/landing'
 
 # Root ICO_HOME directry. Domain specific folders will build from here
-ROOT_ICO_HOME_DIR=/cellone/ico_app
+ROOT_ICO_HOME_DIR='/Users/jens/work/ico_root/app'
 

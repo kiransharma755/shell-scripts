@@ -325,6 +325,8 @@ isInThisBox(){
    OSTYP=$(uname -s)
    if [[ ${OSTYP} == "SunOS" ]]; then
       ALLIPS=$(/usr/sbin/ifconfig -a | grep inet | awk '{ print $2 }' )
+   elif [[ ${OSTYP} == 'Darwin' ]]; then
+      ALLIPS=$(hostname -s)
    else
       ALLIPS=$(hostname -i)
    fi
