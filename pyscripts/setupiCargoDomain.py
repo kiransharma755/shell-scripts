@@ -22,7 +22,7 @@ databaseJdbcUrl = 'jdbc:oracle:thin:@57.20.86.162:1850:XICGARCB'
 databaseDriverKlass = 'oracle.jdbc.xa.client.OracleXADataSource'
 
 # Root folders for all logs
-LOG_ROOT='/data/logs'
+LOG_ROOT='/Users/jens/work/ico_root/logs'
 
 JTA_DETERMINERS = {'iCargoAsyncDataSource':None, 'iCargoDataSource':None}
 
@@ -368,7 +368,7 @@ def createiCargoJmsResources():
       createWSQueue("CAPACITY_BOOKING_XADDONS_EXT_WS_RESPONSE", "com.ibsplc.icargo.xaddons.capacity.booking.external.lh.ws.response");
       createWSQueue("ADDONS_CUSTOMEROFFER_EXT_WS_REQUEST", "com.ibsplc.icargo.addons.customeroffer.external.ws.request");
       createWSQueue("ADDONS_CUSTOMEROFFER_EXT_WS_RESPONSE", "com.ibsplc.icargo.addons.customeroffer.external.ws.response");
-		createWSQueue("EFREIGHT_WS_REQUEST", "com.ibsplc.icargo.shared.efreight.standard.ws.request");
+      createWSQueue("EFREIGHT_WS_REQUEST", "com.ibsplc.icargo.shared.efreight.standard.ws.request");
       createWSQueue("EFREIGHT_WS_RESPONSE", "com.ibsplc.icargo.shared.efreight.standard.ws.response");
       createWSQueue("SHARED_ULD_WS_REQUEST", "com.ibsplc.icargo.shared.uld.standard.ws.request");
       createWSQueue("SHARED_ULD_WS_RESPONSE", "com.ibsplc.icargo.shared.uld.standard.ws.response");
@@ -409,7 +409,7 @@ def createGenericDataSource(dsName, user, password, url, maxConnections=15):
    driverParams.setDriverName(databaseDriverKlass)
    driverParams.setUseXaDataSourceInterface(True)
    driverParams.getProperties().createProperty('user', user)
-   driverParams.getProperties().createProperty('weblogic.jdbc.drainTimeout', 30)
+   driverParams.getProperties().createProperty('weblogic.jdbc.drainTimeout', '30')
    # XA Parameters
    xAParams = datasource.getJDBCXAParams()
    xAParams.setKeepXaConnTillTxComplete(True)

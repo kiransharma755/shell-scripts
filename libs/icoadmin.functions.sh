@@ -719,7 +719,7 @@ doJSPC(){
    typeset HOST=$(hostname)
 
    if [[ $? == 0 ]]; then
-      ${ANT_HOME}/bin/ant -Dear.home=${MYDOMDIR}/${LIVE}/${APP} -DWL_HOME=$WL_HOME -DJAVA_HOME=$JAVA_HOME -f ${CURRDIR}/jspc.xml > ${MYDOMDIR}/${_USER_STAGE}/logs/wls/jspc_${DOMAIN}_${HOST}.log 2>&1 &
+      ${ANT_HOME}/bin/ant -Dear.home=${MYDOMDIR}/${LIVE}/${APP} -DWL_HOME=$WL_HOME -DJAVA_HOME=$JAVA_HOME -f ${CURRDIR}/etc/jspc.xml > ${MYDOMDIR}/${_USER_STAGE}/logs/wls/jspc_${DOMAIN}_${HOST}.log 2>&1 &
       echo ""
       echoi "JSPC has been initiated for DOMAIN : ${DOMAIN}"
       echoi "This takes approximately 15 minutes !"

@@ -5,6 +5,7 @@ tmp/
 nmon*
 
 etc/
+store/
 
 # ignore symlink
 wladmin
