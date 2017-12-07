@@ -42,19 +42,19 @@ ENV_FILE_NAME="iCargoEnv.sh"
 WAIT_FOR_START="true"
 
 # Number of times to loop while waiting for weblogic server to stop during restart (before killing)
-RESTART_STOP_LOOPTIMES=6
+typeset -i RESTART_STOP_LOOPTIMES=10
 
 # Number of times to loop while waiting for weblogic server to start during restart (before giving up)
-RESTART_START_LOOPTIMES=12
+typeset -i RESTART_START_LOOPTIMES=12
 
 # Number of seconds to wait during each tloop while waiting for weblogic server to stop during restart (before killing)
-RESTART_STOP_WAIT=10
+typeset -i RESTART_STOP_WAIT=3
 
 # Number of seconds to wait during each tloop while waiting for weblogic server to start during restart (before giving up)
-RESTART_START_WAIT=30
+typeset -i RESTART_START_WAIT=30
 
 # the delay seconds between starting muliple servers in a cluster/domain
-STARTUP_DELAY=5
+typeset -i STARTUP_DELAY=5
 
 # common entries for icoadmin starts
 # Root directory for log of all environments. Domain specific folders will build from here

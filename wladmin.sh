@@ -8,7 +8,7 @@
 #                                                            #
 ##############################################################
 
-WLADMIN_VERSION='9.0.0.20160316'
+typeset -r WLADMIN_VERSION='10.0.0.20170712'
 
 CURRDIR=`echo $0 | awk '$0 ~ /^\// { print }'`
 if [[ ${CURRDIR} != "" ]]; then
@@ -565,21 +565,38 @@ restartInstance(){
 # kills the java instance
 killInstance(){
    INSTANCE="$1"
-   PID=$(findInstancePid ${INSTANCE} 2>/dev/null )
-   if [[ -z ${PID} ]]; then
-      echoe "Instance : ${INSTANCE} is not running" >&2
+   local WLSPID=$(findInstancePid ${INSTANCE} 2>/dev/null )
+   if [[ -z ${WLSPID} ]]; then
+      echoe "Instance ${INSTANCE} is not running" >&2
       return 1
    fi
-   kill -9 ${PID}
-   typeset -i ANS=$?
+	echoi "Gracefully terminating instance ${INSTANCE} PID : ${WLSPID}"
+   kill -TERM ${WLSPID}
+   kill -0 ${WLSPID} >/dev/null 2>&1
+   typeset -i ANS=${?}
+   typeset -i count=0
+   while [[ ${ANS} -eq 0 && ${count} -le ${RESTART_STOP_LOOPTIMES} ]]; do
+      sleep ${RESTART_STOP_WAIT}
+      kill -0 ${WLSPID} >/dev/null 2>&1
+      typeset -i ANS=${?}
+      count=$((count + 1))
+      echoi "Waiting for ${INSTANCE} to stop PID : ${WLSPID}"
+   done
    if [[ ${ANS} -eq 0 ]]; then
-      echoi "Instance ${INSTANCE} killed sucessfully."
-      return 0
+      echow "Graceful shutdown failed, killing the process ..."
+      kill -9 ${WLSPID}
+	   typeset -i ANS=$?
+	   if [[ ${ANS} -eq 0 ]]; then
+	      echoi "Instance ${INSTANCE} killed sucessfully."
+	      return 0
+	   else
+	      echoe "Unable to kill instance ${INSTANCE}" >&2
+	      return 1
+	   fi
    else
-      echoe "Unable to kill instance ${INSTANCE}" >&2
-      return 1
+      echoi "WebLogic server ${INSTANCE} stopped sucessfully."
+		return 0
    fi
-   
 }
 
 # creates the userconfig and user key files
