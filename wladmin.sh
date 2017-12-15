@@ -45,8 +45,8 @@ printUsage(){
  echo "Usage "
  echo ""
  echo "   Lifecycle : ${WLADMSRPT} ( start | stop | restart | kill ) instance/cluster/domain [ flags ]"
- echo "    start   - starts the managed server instance flags [wait, tail]"
- echo "    stop    - stops the managed server instance gracefully flags [force]"
+ echo "    start   - starts the managed server instance flags [wait, tail, delay]"
+ echo "    stop    - stops the managed server instance gracefully flags [force, block]"
  echo "    restart - restarts the managed server instance gracefully"
  echo "    kill    - kills the managed server java process"
  echo ""
@@ -526,19 +526,20 @@ stopInstance(){
    ADMURL=$(getInstanceUrl ${ADM_SERVER})
    echoi "Admin Server URL : ${ADMURL}"
    PYPROXY="/tmp/.stopInstance_${INSTANCE}.py"
+   [[ ${FLAG} == 'block' ]] && BLOCK='true' || BLOCK='false'
    [[ ${WLS_SHUTDOWN_CMD} == 'FORCESHUTDOWN' ]] && FORCE='true' || FORCE='false'; 
    cat << EOF >> ${PYPROXY}
 # generated python script by ${WLADMSRPT}.
 try:
    connect(userConfigFile='${DOMDIR}/.user.cfg', userKeyFile='${DOMDIR}/.user.key', url='${ADMURL}')
-   shutdown('${INSTANCE}', 'Server', ignoreSessions='true', force='${FORCE}')
+   shutdown('${INSTANCE}', 'Server', ignoreSessions='true', force='${FORCE}', block='${BLOCK}')
 except Error:
    exit('1')
 exit('0')   
 EOF
    invokeWlst ${PYPROXY} >/dev/null 2>&1
    typeset -i ANS=$?
-   rm ${PYPROXY}   
+   rm ${PYPROXY} 
    if [[ ${ANS} -ne 0 && ${FLAG} == "force" ]]; then
       echow "Stop operation failed , killing server."
       kill -0 ${PID} && killInstance ${INSTANCE}
@@ -570,7 +571,7 @@ killInstance(){
       echoe "Instance ${INSTANCE} is not running" >&2
       return 1
    fi
-	echoi "Gracefully terminating instance ${INSTANCE} PID : ${WLSPID}"
+   echoi "Gracefully terminating instance ${INSTANCE} PID : ${WLSPID}"
    kill -TERM ${WLSPID}
    kill -0 ${WLSPID} >/dev/null 2>&1
    typeset -i ANS=${?}
@@ -585,17 +586,17 @@ killInstance(){
    if [[ ${ANS} -eq 0 ]]; then
       echow "Graceful shutdown failed, killing the process ..."
       kill -9 ${WLSPID}
-	   typeset -i ANS=$?
-	   if [[ ${ANS} -eq 0 ]]; then
-	      echoi "Instance ${INSTANCE} killed sucessfully."
-	      return 0
-	   else
-	      echoe "Unable to kill instance ${INSTANCE}" >&2
-	      return 1
-	   fi
+      typeset -i ANS=$?
+      if [[ ${ANS} -eq 0 ]]; then
+         echoi "Instance ${INSTANCE} killed sucessfully."
+         return 0
+      else
+         echoe "Unable to kill instance ${INSTANCE}" >&2
+         return 1
+      fi
    else
       echoi "WebLogic server ${INSTANCE} stopped sucessfully."
-		return 0
+      return 0
    fi
 }
 
@@ -798,21 +799,21 @@ doDispatchCommand(){
             if [[ ${LOCAL_INS} == "true" ]]; then
 	       dispatchCommandRemote ${WLADM_ACTION} ${INST} ${WLADM_FLAG}
 	       typeset -i ANS=$?
-	       if [[ ${ANS} -eq 60 ]]; then
+	    if [[ ${ANS} -eq 60 ]]; then
 	          echow "Instance : ${INST} is not in this box and remote dispatch is disabled."
 	          #return 1
-	       elif [[ ${ANS} -eq 50 ]]; then
+       elif [[ ${ANS} -eq 50 ]]; then
 	          println " instance ${INST} "
 	          CLASSPATH="${CPBACKUP}"
 	          JAVA_OPTIONS="${JOBACKUP}"
 	          eval "${INSCMD} ${INST} ${FLAG}"
-	       fi
-	    else
+				 fi
+       else
 	       println " instance ${INST} "
 	       CLASSPATH="${CPBACKUP}"
 	       JAVA_OPTIONS="${JOBACKUP}"
 	       eval "${INSCMD} ${INST} ${FLAG}"
-            fi
+       fi
          done
          return 0
       else
