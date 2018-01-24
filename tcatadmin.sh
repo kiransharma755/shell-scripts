@@ -2,10 +2,10 @@
 #set -x
 
 ##############################################################
-#                                                                                                                                       #
-# Tomcat Administaration shell script                                                                                    #
-# @Author : Jens J P                                                                                                           #
-#                                                                                                                                       #
+#                                                            #
+# Tomcat Administration shell script                         #
+# @Author : Jens J P                                         #
+#                                                            #
 ##############################################################
 
 CURRDIR=`echo $0 | awk '$0 ~ /^\// { print }'`
@@ -104,6 +104,7 @@ showUsage(){
       stop                           : stops the tomcat server
       kill                           : kills the tomcat server process
       status                         : retrieves the current status of the process
+      ps                             : displays the process command line
       restart                        : restarts the tomcat server
 
    Application Deployment :   
@@ -346,6 +347,7 @@ statusTcatInstance(){
 
 startTcatInstance(){
    local NAME="$1"
+   local FLAG="$2"
    TCTPID=$(isTcatRunning ${NAME})
    typeset -i ANS=${?}
    if [[ ${ANS} -eq 0 ]]; then
@@ -376,6 +378,14 @@ startTcatInstance(){
       echoi "Tomcat started sucessfully, PID : ${TCTPID}"
    else
       echoe "Unable to start tomcat server, check logs for furter details."
+   fi
+   if [[ ${FLAG} == 'tail' ]]; then
+      local CATOUTFILE="${CATBASE}/logs/catalina.out"
+      if [[ -f ${CATOUTFILE} ]]; then
+         tail -f ${CATOUTFILE}
+      else
+         echow "Unable to find catalina out file in ${CATOUTFILE}"
+      fi
    fi
    return ${ANS}
 }
@@ -479,28 +489,31 @@ restartTcatInstance(){
 
 startTomcat(){
    local NAME="$1"
+   local FLAG="$2"
    test -n "${NAME}"
    typeset -i ANS=${?}
    assertExit ${ANS} "Not a valid cluster or node name : ${NAME}"
-   dispatchCommand 'startTcatInstance' ${NAME}
+   dispatchCommand 'startTcatInstance' ${NAME} ${FLAG}
    return ${?}
 }
 
 stopTomcat(){
    local NAME="$1"
+   local FLAG="$2"
    test -n "${NAME}"
    typeset -i ANS=${?}
    assertExit ${ANS} "Not a valid cluster or node name : ${NAME}"
-   dispatchCommand 'stopTcatInstance' ${NAME}
+   dispatchCommand 'stopTcatInstance' ${NAME} ${FLAG}
    return ${?}
 }
 
 restartTomcat(){
   local NAME="$1"
+  local FLAG="$2"
   test -n "${NAME}"
   typeset -i ANS=${?}
   assertExit ${ANS} "Not a valid cluster or node name : ${NAME}"
-  dispatchCommand 'restartTcatInstance' ${NAME}
+  dispatchCommand 'restartTcatInstance' ${NAME} ${FLAG}
   return ${?}
 }
 
@@ -998,22 +1011,22 @@ TCT_FLAGS="${3}"
 case ${TCT_ACT} in 
    
    'start')
-               startTomcat ${TCT_ARG}
+               startTomcat ${TCT_ARG} ${TCT_FLAGS}
                ;;
    'stop')
-               stopTomcat ${TCT_ARG}
+               stopTomcat ${TCT_ARG} ${TCT_FLAGS}
                ;;
    'status')
                statusTomcat ${TCT_ARG}
                ;;
    'restart')
-               restartTomcat ${TCT_ARG}
+               restartTomcat ${TCT_ARG} ${TCT_FLAGS}
                ;;
    'ps')
-               displayTomcatPs  ${TCT_ARG}
+               displayTomcatPs ${TCT_ARG}
 	       ;;
    'kill')
-               killTomcat  ${TCT_ARG}
+               killTomcat ${TCT_ARG}
 	       ;;
    'create')
                createTcatInstance ${TCT_ARG}
@@ -1024,7 +1037,7 @@ case ${TCT_ACT} in
    'list')
               listServers 'local'
               ;;
-	'service-conf')
+   'service-conf')
               generateServiceConf ${TCT_ARG} 'systemd'
               ;;				  
    'freeze')
@@ -1049,13 +1062,13 @@ case ${TCT_ACT} in
              userGreet
              ;;
        *)
-                # check if its a jvm command
+         # check if its a jvm command
    		if isJvmCommand ${TCT_ACT}; then
    		   doDispatchJvmCommand ${TCT_ARG} ${TCT_ACT} ${TCT_FLAGS}
    		else
    		   echoe "Invalid command : ${TCT_ACT}"
    		   showUsage
-                fi
+         fi
         	;;
 esac
 
