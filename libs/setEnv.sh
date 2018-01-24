@@ -26,6 +26,9 @@ ENABLE_COLOR="true"
 # SHUTDOWN - will give time for current txns to complete
 WLS_SHUTDOWN_CMD='FORCESHUTDOWN'
 
+# Shutdown timeout
+typeset -i WLS_SHUTDOWN_TIMEOUT=30000
+
 # ps argument tool for the environment
 # Use java process tool jps for displaying command line
 # export WLADM_PS="${JAVA_HOME}/bin/jps -lv"

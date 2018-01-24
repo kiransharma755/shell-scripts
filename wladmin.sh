@@ -8,7 +8,7 @@
 #                                                            #
 ##############################################################
 
-typeset -r WLADMIN_VERSION='10.0.0.20170712'
+typeset -r WLADMIN_VERSION='10.0.0.20180124'
 
 CURRDIR=`echo $0 | awk '$0 ~ /^\// { print }'`
 if [[ ${CURRDIR} != "" ]]; then
@@ -527,19 +527,28 @@ stopInstance(){
    echoi "Admin Server URL : ${ADMURL}"
    PYPROXY="/tmp/.stopInstance_${INSTANCE}.py"
    [[ ${FLAG} == 'block' ]] && BLOCK='true' || BLOCK='false'
+   # Block the stop operation if in force mode
+   if [[ ${FLAG} == 'force' ]]; then
+      BLOCK='true'
+   fi
    [[ ${WLS_SHUTDOWN_CMD} == 'FORCESHUTDOWN' ]] && FORCE='true' || FORCE='false'; 
    cat << EOF >> ${PYPROXY}
 # generated python script by ${WLADMSRPT}.
 try:
    connect(userConfigFile='${DOMDIR}/.user.cfg', userKeyFile='${DOMDIR}/.user.key', url='${ADMURL}')
-   shutdown('${INSTANCE}', 'Server', ignoreSessions='true', force='${FORCE}', block='${BLOCK}')
+   shutdown('${INSTANCE}', 'Server', ignoreSessions='true', timeOut=${WLS_SHUTDOWN_TIMEOUT}, force='${FORCE}', block='${BLOCK}')
 except Error:
    exit('1')
 exit('0')   
 EOF
    invokeWlst ${PYPROXY} >/dev/null 2>&1
    typeset -i ANS=$?
+   kill -0 ${PID} >/dev/null 2>&1
+   typeset -i ISRUNNING=${?}
    rm ${PYPROXY} 
+   if [[ ${ISRUNNING} -eq 0 ]]; then
+      ANS=1
+   fi
    if [[ ${ANS} -ne 0 && ${FLAG} == "force" ]]; then
       echow "Stop operation failed , killing server."
       kill -0 ${PID} && killInstance ${INSTANCE}
