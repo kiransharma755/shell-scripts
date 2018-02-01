@@ -104,3 +104,9 @@ statusTxpWeb(){
   dispatchCommand 'statusTxpWebInstance' ${NAME} 'txp-web'
   return ${?}
 }
+
+
+
+
+ grep -o 'cache name="[^"]*"' iCargoConfig-21/cache.mappings.xml
+ 

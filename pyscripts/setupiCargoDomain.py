@@ -16,13 +16,13 @@ createWebServiceJMSQueues=True
 
 
 # Database configurations
-databaseUser = 'ICO_READ_ICAPSIT'
-databasePassword = 'Dfg1234cvb'
-databaseJdbcUrl = 'jdbc:oracle:thin:@57.20.86.162:1850:XICGARCB'
+databaseUser = 'ICO_OWR3'
+databasePassword = 'Dfg1234567cvb'
+databaseJdbcUrl = 'jdbc:oracle:thin:@vmh-lcag-ibx-db01-test.lsy.fra.dlh.de:1850:TICGOIBX'
 databaseDriverKlass = 'oracle.jdbc.xa.client.OracleXADataSource'
 
 # Root folders for all logs
-LOG_ROOT='/Users/jens/work/ico_root/logs'
+LOG_ROOT='user_stage/logs'
 
 JTA_DETERMINERS = {'iCargoAsyncDataSource':None, 'iCargoDataSource':None}
 
@@ -233,6 +233,7 @@ def createiCargoJmsResources():
    createTopic("iCargoAlertPaneTopic", "com.ibsplc.icargo.alert.Topic");
    createTopic("iCargoAppClientLoginBroadcastTopic", "com.ibsplc.icargo.iCargoAppClientLoginBroadcastTopic");
    createTopic("XIBASE_EHCACHE_BROADCAST_TOPIC", "com.ibsplc.xibase.ehcache.BroadCastTopic");
+   createTopic("EBL_BUNDLE_TOPIC", "com.ibsplc.icargo.ebl.bundle.feature.topic");
    # xibase stuff
    createQueue("XIBASE_TX_AUDIT_QUEUE", "com.ibsplc.xibase.txAudit.AuditQueue");
    createQueue("XIBASE_ASYNC_QUEUE", "com.ibsplc.xibase.framework.async.ConcurrentQueue");
@@ -538,7 +539,14 @@ def createMaxThreadWorkManager(workManagerName, maxThreads):
    workMBean.setMaxThreadsConstraint(maxWorkMBean)
    print 'maxThreadConstraintWorkManager Created : ' + workManagerName
    
-
+def disableWlsFeatures():
+   cd('/')
+   domainName = cmo.getName()
+   # Disable CDI scanning
+   print 'Disabling CDI bean discovery.'
+   cd('CdiContainer/' + domainName)
+   set('ImplicitBeanDiscoveryEnabled', False)
+   
 #
 # Main block 
 #
@@ -581,8 +589,11 @@ createMaxThreadWorkManager('EventQueueWorkManager', 5)
 createMaxThreadWorkManager('AsyncQueueWorkManager', 5)
 createMaxThreadWorkManager('ConcurrentDispatchWorkManager', 5)
 createMaxThreadWorkManager('wm/ExcelExportManager', 5)
+
 print '--------- Configuring WLS Logs ---------'
 setupLogConfigForCluster()
+
+disableWlsFeatures()
 
 # we are done now lets save all the work
 try:
