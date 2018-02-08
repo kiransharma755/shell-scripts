@@ -9,17 +9,17 @@
 
 	  <target name="jspc" >
 		<echo>${war-dir} ${classes}</echo>
-	          <java classname="weblogic.jspc" fork="no">
-	            <sysproperty key="weblogic.home" value="${WL_HOME}/server"/>
-	            <arg line="-webapp ${war-dir} -verboseJspc -d ${classes} -k -compileAll -maxfiles ${jsp.maxfiles}"/>
-	          	<jvmarg line="-Xms1024m -Xmx2048m -XX:PermSize=256m -XX:MaxPermSize=512m"/>
-	            <classpath>
-	              <pathelement path="${jsp.classpath}"/>
-		      		  <fileset dir="${war-dir}/../APP-INF/lib">
-                         <include name="*.jar" />
-                      </fileset>
-	            </classpath>
-	          </java>
+	         <java classname="weblogic.jspc" fork="true">
+	         <sysproperty key="weblogic.home" value="${WL_HOME}/server"/>
+	         <arg line="-webapp ${war-dir} -compressHtmlTemplate -optimizeJavaExpression -verboseJspc -d ${classes} -k -compileAll -maxfiles ${jsp.maxfiles}"/>
+	         <jvmarg line="-Xms512M -Xmx1G"/>
+	         <classpath>
+	           <pathelement path="${jsp.classpath}"/>
+		    <fileset dir="${war-dir}/../APP-INF/lib">
+                        <include name="*.jar" />
+                    </fileset>
+	          </classpath>
+	         </java>
 	    </target>
 
 </project>

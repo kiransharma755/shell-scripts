@@ -7,13 +7,13 @@ import sys
 from java.lang import System
 
 # Weblogic Server Connection Details
-weblogicUser = "system"
-weblogicPassword = "webl0g!c"
-weblogicAdminUrl = "t3://localhost:7001"
+weblogicUser = "icargo_adm"
+weblogicPassword = "ix+oo3Aes0wo"
+weblogicAdminUrl = "t3://vmh-lcag-icargo-app03-test.lsy.fra.dlh.de:7000"
 
 # Enable if using Base impl
 createWebServiceJMSQueues=True
-
+createEaiJMSQueues=True
 
 # Database configurations
 databaseUser = 'ICO_OWR3'
@@ -30,6 +30,7 @@ JTA_DETERMINERS = {'iCargoAsyncDataSource':None, 'iCargoDataSource':None}
 # Preferences not required to change
 jmsModuleName='iCargoModule'
 jmsWSModuleName='iCargoSoapJmsModule'
+jmsEAIModuleName='iCargoEaiJmsModule'
 jmsServerPfx='JMSServer_'
 jmsStorePfx='FileStore_'
 # Distributed Queues Required - in case of cluster
@@ -81,8 +82,9 @@ def createGetJmsStore(managedServer):
       jmsStore = create(jmsStoreName, "FileStores")
       serverMBean = getServerMBean(managedServer)
       jmsStore.addTarget(serverMBean)
-      jmsStore.setSynchronousWritePolicy("Cache-Flush");
+      jmsStore.setSynchronousWritePolicy("Direct-Write-With-Cache");
       jmsStore.setDirectory("user_stage/store/" + managedServer + "/jms")
+      jmsStore.setCacheDirectory("user_stage/store/" + managedServer + "/jms/cache")
    return jmsStore
 
 
@@ -144,6 +146,27 @@ def createGetJmsModule(moduleName):
    theResource = eaiResource.getJMSResource();
    return theResource
 
+def createEaiQueue(queue_name, jndi_name):
+   global jmsEAIModuleName
+   print "Creating Queue : "+queue_name+"..."
+   eaiResource = createGetJmsModule(jmsEAIModuleName);
+   if createUDD:
+      jmsqueue = eaiResource.lookupDistributedQueue(queue_name)
+   else:
+      jmsqueue = eaiResource.lookupQueue(queue_name)
+   if jmsqueue is None:
+      if createUDD:
+         jmsqueue = eaiResource.createUniformDistributedQueue(queue_name)
+      else:
+         jmsqueue = eaiResource.createQueue(queue_name)
+   jmsqueue.setJNDIName(jndi_name)
+   jmsqueue.setSubDeploymentName('Target_To_Cluster')
+   deliveryFailureParams = jmsqueue.getDeliveryFailureParams()
+   deliveryFailureParams.setRedeliveryLimit(3)
+   deliveryFailureParams.setExpirationPolicy('Discard')
+   deliveryOverrides = jmsqueue.getDeliveryParamsOverrides()
+   deliveryOverrides.setRedeliveryDelay(30000)
+   
 
 def createQueue(queue_name,jndi_name):
    print "Creating Queue : "+queue_name+"..."
@@ -211,7 +234,7 @@ def createTopic(topicName,jndi_name):
    deliveryOverrides.setDeliveryMode('Non-Persistent')
    deliveryOverrides.setTimeToLive(5 * 60 * 1000) # 5 minutes
 
-def createConnectionFactory(cnfName, jndi_name, isXA):
+def createConnectionFactory(cnfName, jndi_name, isXA, loadBalance=True, serverAffinity=True):
    print "Creating ConnectionFactory : "+cnfName+"..."
    eaiResource = createGetJmsModule(jmsModuleName);
    jmsCnf = eaiResource.lookupConnectionFactory(cnfName)
@@ -219,6 +242,9 @@ def createConnectionFactory(cnfName, jndi_name, isXA):
       jmsCnf = eaiResource.createConnectionFactory(cnfName)
    jmsCnf.setJNDIName(jndi_name)
    jmsCnf.setSubDeploymentName('Target_To_Cluster')
+   loadBalancingParams = jmsCnf.getLoadBalancingParams()
+   loadBalancingParams.setServerAffinityEnabled(serverAffinity)
+   loadBalancingParams.setLoadBalancingEnabled(loadBalance)
    try:
       txParams = jmsCnf.getTransactionParams()
       txParams.setXAConnectionFactoryEnabled(isXA)
@@ -245,6 +271,7 @@ def createiCargoJmsResources():
    createQueue("ICARGO_NORMAL_REPORT_QUEUE", "com.ibsplc.icargo.framework.report.NormalReportQueue");
    # msgbroker stuff
    createQueue("MSGBROKER_OUTGOING_QUEUE", "com.ibsplc.icargo.msgbroker.message.OutgoingMessageQueue");
+   createQueue("MSGBROKER_OUTGOING_SEQUENCED_QUEUE", "com.ibsplc.icargo.msgbroker.message.OutgoingSequencedMessageQueue");
    createQueue("MSGBROKER_RETRY_QUEUE", "com.ibsplc.icargo.msgbroker.message.MessageRetryQueue");
    createQueue("MSGBROKER_INCOMING_QUEUE", "icargo.eai.IncomingMessageQueue");
    createQueue("MSGBROKER_INCOMING_SEQ_QUEUE", "icargo.eai.sequenced.IncomingMessageQueue");
@@ -282,6 +309,9 @@ def createiCargoJmsResources():
    createQueue("REVENUE_AUDIT_QUEUE", "com.ibsplc.xibase.revenue.audit");
    createQueue("CUSTOMERMANAGEMENT_AUDIT_QUEUE", "com.ibsplc.xibase.customermanagement.audit");
    createQueue("RECO_AUDIT_QUEUE", "com.ibsplc.xibase.reco.audit");
+   createQueue("DOCUMENTREPOSITORY_AUDIT_QUEUE", "com.ibsplc.xibase.documentrepository.audit");
+   createQueue("TGC_AUDIT_QUEUE", "com.ibsplc.xibase.tgc.audit");
+   
    # WebService JMS Queues
    if createWebServiceJMSQueues:
       createWSQueue("CUSTOMER_DEFAULTS_WS_REPLY", "com.ibsplc.icargo.customer.defaults.ws.response");
@@ -373,7 +403,26 @@ def createiCargoJmsResources():
       createWSQueue("EFREIGHT_WS_RESPONSE", "com.ibsplc.icargo.shared.efreight.standard.ws.response");
       createWSQueue("SHARED_ULD_WS_REQUEST", "com.ibsplc.icargo.shared.uld.standard.ws.request");
       createWSQueue("SHARED_ULD_WS_RESPONSE", "com.ibsplc.icargo.shared.uld.standard.ws.response");
-
+      createWSQueue("DOCUMENT_REPOSITORY_REQUEST", "com.ibsplc.icargo.businessframework.documentrepository.defaults.standard.ws.request");
+      createWSQueue("DOCUMENT_REPOSITORY_RESPONSE", "com.ibsplc.icargo.businessframework.documentrepository.defaults.standard.ws.response");
+      createWSQueue("TGC_DEFAULTS_STANDARD_WS_REQUEST", "com.ibsplc.icargo.tgc.defaults.standard.ws.request");
+      createWSQueue("TGC_DEFAULTS_STANDARD_WS_RESPONSE", "com.ibsplc.icargo.tgc.defaults.standard.ws.response");
+   # Implementation Specific EAI Queues
+   if createEaiJMSQueues:
+      createConnectionFactory("EAIQueueConnectionFactory", "EAIQueueConnectionFactory", True, True, False);
+      createEaiQueue('ICO.BKGENG.IN', 'icargo.eai.extmsg.bkgeng.incomingmessagequeue')
+      createEaiQueue('ICO.CXML.IN', 'icargo.eai.extmsg.cxml.incomingmessagequeue')
+      createEaiQueue('ICO.EMAIL.IN', 'icargo.eai.extmsg.email.incomingmessagequeue')
+      createEaiQueue('ICO.MESX.IN', 'icargo.eai.extmsg.mesx.incomingmessagequeue')
+      createEaiQueue('ICO.ORDERSTEERING.IN', 'icargo.eai.extmsg.ordersteering.incomingmessagequeue')
+      createEaiQueue('ICO.REGULATEDAGENTS.IN', 'icargo.eai.extmsg.regulatedagents.incomingmessagequeue')
+      createEaiQueue('ICO.SCALE.IN', 'icargo.eai.extmsg.scale.incomingmessagequeue')
+      createEaiQueue('ICO.SCHEDCONNECT.IN', 'icargo.eai.extmsg.schedconnect.incomingmessagequeue')
+      createEaiQueue('ICO.SMARTGATE.IN', 'icargo.eai.extmsg.smartgate.incomingmessagequeue')
+      createEaiQueue('ICO.TANGO.IN', 'icargo.eai.extmsg.tango.incomingmessagequeue')
+      createEaiQueue('ICO.TRAXON.IN', 'icargo.eai.extmsg.traxon.incomingmessagequeue')
+      createEaiQueue('ICO.ZABIS.IN', 'icargo.eai.extmsg.zabis.incomingmessagequeue')
+      createEaiQueue('ICO.ZODIAK.IN', 'icargo.eai.extmsg.zodiak.incomingmessagequeue')
 
 # ------------- datasource configuration --------------- #
 
@@ -467,6 +516,7 @@ def createAuthorizer(authName, authClass):
 # -------------- JTA Configurations -------------------- #
 
 def applyJTASettings():
+   global JTA_DETERMINERS
    cd('/JTA/' + domainName)
    cmo.setTimeoutSeconds(300)
    cmo.setAbandonTimeoutSeconds(1800)
@@ -474,7 +524,7 @@ def applyJTASettings():
    cmo.setParallelXAEnabled(True)
    cmo.setTwoPhaseEnabled(True)
    # check if 12CR2
-   if hasattr(cmo, 'TLOGWriteWhenDeterminerExistsEnabledx'):
+   if hasattr(cmo, 'TLOGWriteWhenDeterminerExistsEnabled'):
       cmo.setTLOGWriteWhenDeterminerExistsEnabled(False)
       cfgDeterminers = cmo.getDeterminers()
       if cfgDeterminers is None:
