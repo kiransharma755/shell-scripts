@@ -6,25 +6,29 @@
 #
 #set -x
 
-#export JAVA_HOME="/cellone/jdk1.7.0_75"
-#export BEA_HOME="/home/bea/bea12/weblogic12"
-export WLADM_WL_HOME='/opt/bea1223/wlserver'
-export ANT_HOME='/opt/bea1223/oracle_common/modules/thirdparty/org.apache.ant/1.9.8.0.0/apache-ant-1.9.8'
+export WLADM_WL_HOME='/app/mw/weblogic/wlserver'
+export ANT_HOME='/app/mw/weblogic/oracle_common/modules/thirdparty/org.apache.ant/1.9.8.0.0/apache-ant-1.9.8'
 # set the weblogic env 
 . ${WLADM_WL_HOME}/server/bin/setWLSEnv.sh > /dev/null 2>&1
 
 # if remote dispatch of commands is required over ssh
-ENABLE_REMOTE_DISPATCH="true"
+typeset -r ENABLE_REMOTE_DISPATCH='true'
 
 # enable piped out log file
-ENABLE_PIPED_LOG="false"
+typeset -r ENABLE_PIPED_LOG='false'
 
 # enable shell colors
-ENABLE_COLOR="true"
+typeset -r ENABLE_COLOR='true'
 
 # FORCESHUTDOWN - will result in rollback of current txns ( faster shutdown )
 # SHUTDOWN - will give time for current txns to complete
-WLS_SHUTDOWN_CMD='FORCESHUTDOWN'
+typeset -r WLS_SHUTDOWN_CMD='FORCESHUTDOWN'
+
+# Connect to admin server using t3s over SSL
+typeset -r WLS_ADMIN_SSL='false'
+
+# WLST startup options
+export WLST_PROPERTIES='-Djava.security.egd=file:/dev/./urandom'
 
 # Shutdown timeout
 typeset -i WLS_SHUTDOWN_TIMEOUT=30000
@@ -61,11 +65,11 @@ typeset -i STARTUP_DELAY=5
 
 # common entries for icoadmin starts
 # Root directory for log of all environments. Domain specific folders will build from here
-ROOT_LOG_DIR='/Users/jens/work/ico_root/logs'
+ROOT_LOG_DIR='/app/mw/logs'
 
 # Root landing directory. Domain specific folders will build from here
-ROOT_LANDING_DIR='/Users/jens/work/ico_root/landing'
+ROOT_LANDING_DIR='/app/icargo/ico_root/landing'
 
 # Root ICO_HOME directry. Domain specific folders will build from here
-ROOT_ICO_HOME_DIR='/Users/jens/work/ico_root/app'
+ROOT_ICO_HOME_DIR='/app/icargo/ico_root/app'
 

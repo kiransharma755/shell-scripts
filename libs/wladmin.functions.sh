@@ -180,7 +180,11 @@ getInstanceUrl(){
    INSTANCE="$1"
    PROTO="$2"
    if [[ ${PROTO} == "" ]]; then
-      PROTO="t3"
+      if [[ ${WLS_ADMIN_SSL} == 'true' ]]; then
+         PROTO='t3s'
+      else
+         PROTO='t3'
+      fi
    fi
    HOST=$(getInstanceHost ${INSTANCE})
    typeset -i ANS=$?

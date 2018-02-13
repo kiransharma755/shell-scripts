@@ -46,7 +46,7 @@ printUsage(){
  echo ""
  echo "   Lifecycle : ${WLADMSRPT} ( start | stop | restart | kill ) instance/cluster/domain [ flags ]"
  echo "    start   - starts the managed server instance flags [wait, tail, delay]"
- echo "    stop    - stops the managed server instance gracefully flags [force, block]"
+ echo "    stop    - stops the managed server instance gracefully flags [force, block, nowait]"
  echo "    restart - restarts the managed server instance gracefully"
  echo "    kill    - kills the managed server java process"
  echo ""
@@ -60,8 +60,13 @@ printUsage(){
  echo "   Management : ${WLADMSRPT} ( wlst ) instance/cluster/domain"
  echo "    wlst    - starts the weblogic scripting tool < optionally provide a script to be executed >"
  echo ""
+ echo "   House Keeping : ${WLADMSRPT} ( clearlogs | clearjms | cleartmps) instance/cluster/domain"
+ echo "    clearlogs - clears the servers logs"
+ echo "    clearjms  - clears the JMS persistent store contents"
+ echo "    cleartmps - clears the server temp and persistent caches" 
+ echo ""
  echo "   Log Management : ${WLADMSRPT} ( tailout | rotate ) instance"
- echo "    tailout - tails the instance log out file"
+ echo "    tail    - tails the instance log files"
  echo "    rotate  - rotates the log file"
  echo ""
  showJvmCommandUsage
@@ -207,8 +212,8 @@ displayInstancePs(){
 
 # rotates the logs files of the instance
 rotateInstanceLogs(){
-   INSTANCE="$1"
-   REFERER="$2"
+   local INSTANCE="$1"
+   local REFERER="$2"
    isValidInstance ${INSTANCE}
    typeset -i ANS=$?
    if [[ ${ANS} -ne 0 ]]; then
@@ -221,9 +226,10 @@ rotateInstanceLogs(){
       echoe "Provide a valid instance running in this box , instance not in this box : ${INSTANCE}" >&2
       return 1
    fi
-   DOMDIR=$(getDomainDirectoryForInstance ${INSTANCE})
-   TMS=$(date '+%Y%m%d_%H%M%S')
-   LOGFILE="${DOMDIR}/servers/${INSTANCE}/logs/${INSTANCE}.out"
+   local DOMDIR=$(getDomainDirectoryForInstance ${INSTANCE})
+   local TMS=$(date '+%Y%m%d_%H%M%S')
+   local LOGROOT=$(getLogDir ${DOMDIR} ${INSTANCE})
+   local LOGFILE="${LOGROOT}/wls/${INSTANCE}.out"
    if [[ -e ${LOGFILE} ]]; then
       if [[ ${ENABLE_PIPED_LOG} == 'true' ]]; then
          # stop the writer
@@ -260,7 +266,7 @@ rotateInstanceLogs(){
 
 # tails the instance out log file
 tailInstanceOutLog(){
-   INSTANCE="$1"
+   local INSTANCE="$1"
    isValidInstance ${INSTANCE}
    typeset -i ANS=$?
    if [[ ${ANS} -ne 0 ]]; then
@@ -273,13 +279,11 @@ tailInstanceOutLog(){
       echoe "Provide a valid instance running in this box , instance not in this box : ${INSTANCE}" >&2
       return 1
    fi
-   DOMDIR=$(getDomainDirectoryForInstance ${INSTANCE})
-   LOGFILE="${DOMDIR}/servers/${INSTANCE}/logs/${INSTANCE}.out"
-   if [[ -e ${LOGFILE} ]]; then
-      tail -100f ${LOGFILE}
-   else
-      echow "Log file does not exist for instance ${INSTANCE}"
-   fi
+   local DOMDIR=$(getDomainDirectoryForInstance ${INSTANCE})
+   local LOGROOT=$(getLogDir ${DOMDIR} ${INSTANCE})
+   local LOGFILES=$( find ${LOGROOT}/ -type f \( -name "${INSTANCE}*log" -o -name "${INSTANCE}.out" \) -not \( -name "${INSTANCE}*access*" -o -name "${INSTANCE}*GC*" \) -print | awk '{ CP[FNR]=$1 } END { for (i = 1 ;i < FNR ; i++) { CPP=CP[i]" "CPP } ; print CPP CP[i]}' )
+   echo ${LOGFILES} 
+   tail -f ${LOGFILES}
    return 0
 }
 
@@ -347,6 +351,31 @@ clearInstanceLogs(){
       echoi "Log files cleared successfully for instance : ${INSTANCE}"
    else
       echoe "Error occurred while clearing Log files for instance : ${INSTANCE}"
+   fi
+   return ${ANS}
+}
+
+# function to clear the temp files of the server
+clearInstanceWlsTmps(){
+   local INSTANCE="$1"
+   local PID=$(findInstancePid ${INSTANCE} 2>/dev/null )
+   if [[ -n ${PID} ]]; then
+      echoe "Instance : ${INSTANCE} is already running PID : ${PID}, ignoring log clear operation" >&2
+      return 1
+   fi
+   DOMDIR=$(getDomainDirectoryForInstance ${INSTANCE})
+   typeset -i ANS=$?
+   if [[ ${ANS} -ne 0 ]]; then
+      echoe "Error getting domain directory for instance : ${INSTANCE}" >&2
+      return 1
+   fi
+   local WLSINSWRK="${DOMDIR}/servers/${INSTANCE}"
+   find ${WLSINSWRK}/tmp ${WLSINSWRK}/cache -type f -exec rm -f {} \;
+   typeset -i ANS=$?
+   if [[ ${ANS} -eq 0 ]]; then
+      echoi "Temp files and caches cleared successfully for instance : ${INSTANCE}"
+   else
+      echoe "Error occurred while clearing Temp files for instance : ${INSTANCE}"
    fi
    return ${ANS}
 }
@@ -422,9 +451,9 @@ stopLogPipeWriter(){
 
 # starts the instance if its not running
 startInstance(){
-   INSTANCE="$1"
-   FLAG="$2"
-   PID=$(findInstancePid ${INSTANCE} 2>/dev/null )
+   local INSTANCE="$1"
+   local FLAG="$2"
+   local PID=$(findInstancePid ${INSTANCE} 2>/dev/null )
    if [[ -n ${PID} ]]; then
       echoe "Instance : ${INSTANCE} is already running PID : ${PID}, ignoring start operation" >&2
       return 1
@@ -441,18 +470,22 @@ startInstance(){
       echoe "Environment file not present or can not be executed : ${ENVFILE}" >&2
       return 1
    fi
-   #println "-"
    # source the environment file
    . ${ENVFILE} ${INSTANCE}
-   ISADM=$(isAdminServer ${INSTANCE})
-   LOGOUTFILE="${DOMDIR}/servers/${INSTANCE}/logs/${INSTANCE}.out"
+   local ISADM=$(isAdminServer ${INSTANCE})
+   local LOGOUTDIR="${DOMDIR}/user_stage/logs/wls"
+   if [[ ! -d ${LOGOUTDIR} ]]; then
+      mkdir -p ${LOGOUTDIR}
+      echoi "Created wls log directory ${LOGOUTDIR}"
+   fi
+   local LOGOUTFILE="${LOGOUTDIR}/${INSTANCE}.out"
    LOGOUT=$(resolveLogDelegate ${LOGOUTFILE} 'false')
    typeset -i ANS=${?}
    [[ ${ANS} -ne 0 ]] && LOGOUT="${LOGOUTFILE}"
    if [[ ${ISADM} == "yes" ]]; then
       echoi "Starting Admin server : ${INSTANCE}"
       nohup ${DOMDIR}/bin/startWebLogic.sh > ${LOGOUT} 2>&1 &
-      PID=${!}
+      local PID=${!}
    else
       ADMURL=$(getAdminServerUrlForInstance ${INSTANCE})
       typeset -i ANS=$?
@@ -462,7 +495,7 @@ startInstance(){
       fi
       echoi "Starting Managed server : ${INSTANCE}"
       nohup ${DOMDIR}/bin/startManagedWebLogic.sh ${INSTANCE} ${ADMURL} > ${LOGOUT} 2>&1 &
-      PID=${!}
+      local PID=${!}
    fi
    echoi "Start process initiated processId : ${PID}"
    echoi "Log file written to : ${LOGOUTFILE}"
@@ -485,14 +518,12 @@ startInstance(){
    fi
    # If required to tail
    if [[ ${FLAG} == "tail" ]]; then
-      tail -100f ${LOGOUTFILE}
+      tailInstanceOutLog ${INSTANCE}
    fi
    if [[ ${FLAG} == "delay" ]]; then
       echoi "Waiting for ${STARTUP_DELAY} seconds ..."
       sleep ${STARTUP_DELAY}
    fi
-
-   #println "-"
    return 0
 }
 
@@ -526,12 +557,17 @@ stopInstance(){
    ADMURL=$(getInstanceUrl ${ADM_SERVER})
    echoi "Admin Server URL : ${ADMURL}"
    PYPROXY="/tmp/.stopInstance_${INSTANCE}.py"
-   [[ ${FLAG} == 'block' ]] && BLOCK='true' || BLOCK='false'
-   # Block the stop operation if in force mode
-   if [[ ${FLAG} == 'force' ]]; then
+   if [[ ${FLAG} = 'nowait' ]]; then
+      WLS_SHUTDOWN_TIMEOUT=5
+      BLOCK='false'
+      [[ ${WLS_SHUTDOWN_CMD} == 'FORCESHUTDOWN' ]] && FORCE='true' || FORCE='false'; 
+   elif [[ ${FLAG} == 'block' ]]; then
       BLOCK='true'
+      [[ ${WLS_SHUTDOWN_CMD} == 'FORCESHUTDOWN' ]] && FORCE='true' || FORCE='false'; 
+   elif [[ ${FLAG} == 'force' || ${WLS_SHUTDOWN_CMD} == 'FORCESHUTDOWN' ]]; then
+      BLOCK='true'
+      FORCE='true'
    fi
-   [[ ${WLS_SHUTDOWN_CMD} == 'FORCESHUTDOWN' ]] && FORCE='true' || FORCE='false'; 
    cat << EOF >> ${PYPROXY}
 # generated python script by ${WLADMSRPT}.
 try:
@@ -545,7 +581,8 @@ EOF
    typeset -i ANS=$?
    kill -0 ${PID} >/dev/null 2>&1
    typeset -i ISRUNNING=${?}
-   rm ${PYPROXY} 
+   # Delete the py file if executed sync
+   [[ ${INVOKE_MODE} == 'sync' ]] && rm ${PYPROXY} 
    if [[ ${ISRUNNING} -eq 0 ]]; then
       ANS=1
    fi
@@ -987,8 +1024,8 @@ listInstance(){
 }
 
 doList(){
-   NAME="$1"
-   FLAGS="$2"
+   local NAME="$1"
+   local FLAGS="$2"
    if [[ ${NAME} == "" ]]; then
       echoe "Enter a valid list option all, local, instance, cluster or domain name" >&2
       return 1
@@ -1013,7 +1050,7 @@ doList(){
 }
 
 doClearJmsStore(){
-   NAME="$1"
+   local NAME="$1"
    if [[ ${NAME} == "" ]]; then
       echoe "Enter a valid instance, cluster or domain name" >&2
       return 1
@@ -1025,7 +1062,7 @@ doClearJmsStore(){
 }
 
 doClearLogs(){
-   NAME="$1"
+   local NAME="$1"
    if [[ ${NAME} == "" ]]; then
       echoe "Enter a valid instance, cluster or domain name" >&2
       return 1
@@ -1036,9 +1073,21 @@ doClearLogs(){
    return $ANS
 }
 
+doClearWlsTmps(){
+   local NAME="$1"
+   if [[ -z ${NAME} ]]; then
+      echoe "Enter a valid instance, cluster or domain name" >&2
+      return 1
+   fi
+   LOCAL_INS='true'
+   doDispatchCommand "clearInstanceWlsTmps" ${NAME}
+   typeset -i ANS=${?}
+   return ${ANS}
+}
+
 invokeWlst(){
-   PYFILE="$1"
-   WLST_SCRIPT="${WLADM_WL_HOME}/common/bin/wlst.sh"
+   local PYFILE="$1"
+   local WLST_SCRIPT="${WLADM_WL_HOME}/common/bin/wlst.sh"
    if [[ ! -x ${WLST_SCRIPT} ]]; then
       echoe "wlst.sh file does not exists or is not executable : ${WLST_SCRIPT}"
    fi
@@ -1050,6 +1099,7 @@ invokeWlst(){
    export WLST_EXT_CLASSPATH
    ${WLST_SCRIPT} -skipWLSModuleScanning ${PYFILE}
    return ${?}
+   
 }
 
 typeset -r JVMCMD_SEP='@'
@@ -1153,8 +1203,8 @@ case ${WLADM_ACTION} in
         'rotate')
                 doRotateLogs ${WLADM_NAME}
                 ;;
-        'tailout')
-                doTailOutLog ${WLADM_NAME}
+        'tail')
+                doTailOutLog ${WLADM_NAME} ${WLADM_FLAG}
                 ;;
         'start')
                 doStartServers ${WLADM_NAME} ${WLADM_FLAG}
@@ -1176,6 +1226,9 @@ case ${WLADM_ACTION} in
                 ;;
         'clearlogs')
                 doClearLogs ${WLADM_NAME}
+                ;;
+        'cleartmps')
+                doClearWlsTmps ${WLADM_NAME}
                 ;;
         'storeuserconfig')
                 createUserKeyFilesForInstance ${WLADM_NAME}
