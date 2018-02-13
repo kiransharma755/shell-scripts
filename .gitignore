@@ -12,3 +12,7 @@ wladmin
 icoadmin
 txpadmin
 
+# Don`t track jar files
+*.jar
+libs/*.jar
+
