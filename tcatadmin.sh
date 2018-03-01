@@ -364,13 +364,18 @@ startTcatInstance(){
       echoe "Catalina home directory not found ${CATHOME}"
       return 1
    fi
+   echoi "Server base : ${CATALINA_BASE}"
+   local CATWORK="${CATBASE}/work/Catalina"
+   if [[ -d ${CATWORK} ]]; then
+      echoi "Clearing Tomcat work directory ..."
+      rm -r ${CATWORK}
+   fi
    # some defaults 
    export CATALINA_BASE="${CATBASE}"
    export CATALINA_PID="${CATBASE}/.${NAME}.pid"
    export USE_NOHUP='true'
    export SERVER_NAME="${NAME}"
    echoi "Starting tomcat server ${NAME} ..."
-   echoi "Server base : ${CATALINA_BASE}"
    ${CATHOME}/bin/catalina.sh start
    typeset -i ANS=${?}
    if [[ ${ANS} -eq 0 ]]; then
