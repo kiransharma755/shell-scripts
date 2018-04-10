@@ -12,27 +12,28 @@
 # @ Author : Binu K (IBS Software Services (P) Ltd)                     #
 #########################################################################
 #set -x
-
 # folder names
-_USER_STAGE="user_stage"
-_LIVE="live"
-_LANDING="landing"
-_ARCHIVE="archive"
-_APP="app"
-_INTF="intf"
+
+typeset -r _USER_STAGE='user_stage'
+typeset -r _LIVE='live'
+typeset -r _LANDING='landing'
+typeset -r _ARCHIVE='archive'
+typeset -r _APP='app'
+typeset -r _INTF='intf'
+
 export ARCHIVE="${_USER_STAGE}/${_ARCHIVE}/${_APP}"
 export LANDING="${_USER_STAGE}/${_LANDING}/${_APP}"
 export LIVE="${_USER_STAGE}/${_LIVE}/${_APP}"
 export INTF="${_USER_STAGE}/${_INTF}"
 
-export ICOCONFIG=iCargoConfig
+export ICOCONFIG='iCargoConfig'
 export APP="${APP_DEP_NAME:-icargo}"
-export APP_CONFIG=${ICOCONFIG}
+export APP_CONFIG="${ICOCONFIG}"
 export VERSION_FILE="${APP}.ver"
-export JIGSAW_VERSION_FILE=jigsaw.ver
-export TMPLOC=tmp/_WL_user
-export ICARGO_WAR=icargo-web.war
-export RELEASE_TYPE_FILE=.icargorel.typ
+export JIGSAW_VERSION_FILE='jigsaw.ver'
+export TMPLOC='tmp/_WL_user'
+export ICARGO_WAR='icargo-web.war'
+export RELEASE_TYPE_FILE='.icargorel.typ'
 
 export BOLD="\033[1m"
 export NORM="\033[0m"
@@ -183,7 +184,6 @@ explodeEar(){
       
       typeset FILE=${MYDOMDIR}/${LIVE}/icargo.ear
       if [[ -w ${FILE} ]]; then
-         
          typeset RCODE=`unzip -l ${FILE} | grep icargo/ | wc -l`
          if [[ $? -eq 0 ]]; then
             if [[ ${RCODE} -le 1 ]]; then
@@ -540,8 +540,7 @@ writeOutConfig(){
    typeset SRC_FOLDER=${COMMON_CONFIG_DIR}/${DOMAIN}/${ICOCONFIG}
 
    if [[ -r ${SRC_FOLDER} ]]; then
-      echow "#### WARNING!!   WARNING!!      WARNING!!   ######"
-      echow "The following files will be replaced from backed up configuration"
+      echoi "The following files will be replaced from backed up configuration"
       ls -R ${SRC_FOLDER}
       cp -R ${SRC_FOLDER}/* ${DEST_FOLDER}/
       return 0;
@@ -560,8 +559,7 @@ writeOutHostConfig(){
    typeset SRC_FOLDER=${COMMON_CONFIG_DIR}/${DOMAIN}/${HOST_NAME}/${ICOCONFIG}
 
    if [[ -r ${SRC_FOLDER} ]]; then
-      echow "#### WARNING!!   WARNING!!      WARNING!!   ######"
-      echow "The following files will be replaced from host specific backed up configuration"
+      echoi "The following files will be replaced from host specific backed up configuration"
       ls -R ${SRC_FOLDER}
       cp -R ${SRC_FOLDER}/* ${DEST_FOLDER}/
       return 0;
@@ -579,8 +577,7 @@ writeOutEar(){
    typeset SRC_FOLDER=${COMMON_CONFIG_DIR}/${DOMAIN}/${APP}
 
 if [[ -r ${SRC_FOLDER} ]]; then
-   echow "#### WARNING!!   WARNING!!      WARNING!!   ######"
-   echow "The following files will be replaced from backed up application"
+   echoi "The following files will be replaced from backed up application"
    ls -R ${SRC_FOLDER}
    cp -R ${SRC_FOLDER}/* ${DEST_FOLDER}/
    return 0;
@@ -595,12 +592,14 @@ makeUserStages(){
   typeset DOMAIN=${1}
   isDomainInThisBox ${DOMAIN}
   if [[ $? -ne 0 ]]; then
-    continue
+    echoe "Domain not hosted in this box."
+    return 1
   fi
-  makeDirectories ${DOMAIN} APP_HOME
-  makeDirectories ${DOMAIN} APP_LANDING
-  makeDirectories ${DOMAIN} APP_LOGS
-  makeDirectories ${DOMAIN} COMMON
+  makeDirectories ${DOMAIN} 'APP_HOME'
+  makeDirectories ${DOMAIN} 'APP_LANDING'
+  makeDirectories ${DOMAIN} 'APP_LOGS'
+  makeDirectories ${DOMAIN} 'COMMON'
+  makeDirectories ${DOMAIN} 'STORE'
 }
 
 makeDirectories(){
@@ -611,96 +610,108 @@ makeDirectories(){
    mkdir -p ${MYDOMDIR}/${_USER_STAGE}
  fi
  case ${AREA} in
-        APP_HOME)
-      echo "Creating APP_HOME directories..."
-                  $(checkPathExist ${ROOT_ICO_HOME_DIR})
-      if [[ $? == 0 ]]; then
-         APP_HOME_LIVE=${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_LIVE}/${_APP}
-         if [[ ! -d ${APP_HOME_LIVE} ]]; then
-            mkdir -p ${APP_HOME_LIVE}
-            echoi "${APP_HOME_LIVE} created"
-            # create simlink to USER_STAGE/LIVE
-            ln -s ${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_LIVE} ${MYDOMDIR}/${_USER_STAGE}/${_LIVE} 
-            echo "${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_LIVE} ${MYDOMDIR}/${_USER_STAGE}/${_LIVE} created"
+      'APP_HOME')
+         echo "Creating APP_HOME directories..."
+         $(checkPathExist ${ROOT_ICO_HOME_DIR})
+         if [[ $? == 0 ]]; then
+            local APP_HOME_LIVE="${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_LIVE}/${_APP}"
+            if [[ ! -d ${APP_HOME_LIVE} ]]; then
+               mkdir -p ${APP_HOME_LIVE}
+               echoi "${APP_HOME_LIVE} created"
+            fi
+            createSymlinkIfRequired "${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_LIVE}" "${MYDOMDIR}/${_USER_STAGE}/${_LIVE}"
+            local APP_HOME_ARCHIVE="${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_ARCHIVE}/${_APP}"
+            if [[ ! -d ${APP_HOME_ARCHIVE} ]]; then
+               mkdir -p ${APP_HOME_ARCHIVE}
+               echoi "${APP_HOME_ARCHIVE} created"
+            fi
+            createSymlinkIfRequired "${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_ARCHIVE}" "${MYDOMDIR}/${_USER_STAGE}/${_ARCHIVE}"
+            local APP_HOME_INTF="${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_INTF}"
+            if [[ ! -d ${APP_HOME_INTF} ]]; then
+               mkdir -p ${APP_HOME_INTF}
+               echoi "${APP_HOME_INTF} created"
+            fi
+            createSymlinkIfRequired "${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_INTF}" "${MYDOMDIR}/${_USER_STAGE}/${_INTF}"
+         else
+            echow "${ROOT_ICO_HOME_DIR} does not exists, so skipping"
          fi
+      ;;
+      'APP_LANDING')
+         echoi "Creating APP_LANDING directories..."
+         $(checkPathExist ${ROOT_LANDING_DIR})
+         if [[ $? == 0 ]]; then
+            local APP_LANDING="${ROOT_LANDING_DIR}/${DOMAIN}/${_APP}"
+            if [[ ! -d ${APP_LANDING} ]]; then
+               mkdir -p ${APP_LANDING}
+               echoi "${APP_LANDING} created"
+            fi
+            createSymlinkIfRequired "${ROOT_LANDING_DIR}/${DOMAIN}" "${MYDOMDIR}/${_USER_STAGE}/${_LANDING}"
+         else
+            echow "${ROOT_LANDING_DIR} does not exists, so skipping"
+         fi
+      ;;
+      'APP_LOGS')
+         echoi "Creating APP_LOGS directories..."
+         $(checkPathExist ${ROOT_LOG_DIR})
+         if [[ $? == 0 ]]; then
+            local APP_LOGS="${ROOT_LOG_DIR}/${DOMAIN}"
+            if [[ ! -d ${APP_LOGS} ]]; then
+               mkdir -p "${APP_LOGS}/app" "${APP_LOGS}/wls"
+               echoi "${APP_LOGS} created"
+            fi
+            if [[ -d ${APP_LOGS} ]]; then
+               # create simlink to USER_STAGE/LOGS
+               if [[ ! -d "${MYDOMDIR}/${_USER_STAGE}/logs" ]]; then
+                  createSymlinkIfRequired "${APP_LOGS}" "${MYDOMDIR}/${_USER_STAGE}/logs"
+               fi
+            fi
+         else
+            echow "${ROOT_LOG_DIR} does not exists, so skipping"
+         fi
+      ;;
+      'COMMON')
+         echoi "Creating COMMON directories..."
+         $(checkPathExist ${COMMON_CONFIG_DIR})
+         if [[ $? == 0 ]]; then
+            createSymlinkIfRequired "${COMMON_CONFIG_DIR}" "${MYDOMDIR}/${_USER_STAGE}/common"
+         else
+            echow "${COMMON_CONFIG_DIR} does not exists, so skipping"
+         fi
+      ;;
+      'STORE')
+         echoi "Creating STORE directories..."
+         $(checkPathExist ${ROOT_STORE_DIR})
+         if [[ $? == 0 ]]; then
+            local DOMAIN_STORE="${ROOT_STORE_DIR}/${DOMAIN}"
+            if [[ ! -d ${DOMAIN_STORE} ]]; then
+               mkdir -p ${DOMAIN_STORE}
+            fi
+            createSymlinkIfRequired "${DOMAIN_STORE}" "${MYDOMDIR}/${_USER_STAGE}/store"
+            local ALLINSTS=$(findAllInstancesForDomain ${DOMAIN})
+            local JPREFS="${DOMAIN_STORE}/javaPrefs"
+            for INSTANCE in ${ALLINSTS}; do
+               mkdir -p "${JPREFS}/${INSTANCE}"/{.java,.systemPrefs}
+            done
+            echoi "Created Java preference directories to ${MYDOMDIR}/${_USER_STAGE}/store."
+         else
+            echow "${ROOT_STORE_DIR} does not exists, so skipping"
+         fi
+      ;;
+      *)
+         echoe "Unknown AREA - ${AREA} specified. Can be APP_LANDING,APP_HOME,APP_LOGS" >&2
+         return 1
+      ;;
+   esac
+}
 
-         APP_HOME_ARCHIVE=${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_ARCHIVE}/${_APP}
-         if [[ ! -d ${APP_HOME_ARCHIVE} ]]; then
-            mkdir -p ${APP_HOME_ARCHIVE}
-            echoi "${APP_HOME_ARCHIVE} created"
-            # create simlink to USER_STAGE/ARCHIVE
-            ln -s ${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_ARCHIVE} ${MYDOMDIR}/${_USER_STAGE}/${_ARCHIVE} 
-            echo "${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_ARCHIVE} -> ${MYDOMDIR}/${_USER_STAGE}/${_ARCHIVE} created"
-         fi
-         APP_HOME_INTF=${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_INTF}
-         if [[ ! -d ${APP_HOME_INTF} ]]; then
-            mkdir -p ${APP_HOME_INTF}
-            echoi "${APP_HOME_INTF} created"
-            # create simlink to USER_STAGE/INTF
-            ln -s ${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_INTF} ${MYDOMDIR}/${_USER_STAGE}/${_INTF}
-            echo "${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_INTF} -> ${MYDOMDIR}/${_USER_STAGE}/${_INTF} created"
-         fi
-      else
-         echow "${ROOT_ICO_HOME_DIR} does not exists, so skipping"
-      fi
-                ;;
-        APP_LANDING)
-                echoi "Creating APP_LANDING directories..."
-      $(checkPathExist ${ROOT_LANDING_DIR})
-      if [[ $? == 0 ]]; then
-         APP_LANDING=${ROOT_LANDING_DIR}/${DOMAIN}/${_APP}
-         if [[ ! -d ${APP_LANDING} ]]; then
-            mkdir -p ${APP_LANDING}
-            echoi "${APP_LANDING} created"
-         fi
-         if [[ -d ${ROOT_LANDING_DIR}/${DOMAIN} ]]; then
-            if [[ ! -d ${MYDOMDIR}/${_USER_STAGE}/${_LANDING} ]]; then   
-               # create simlink to USER_STAGE/ARCHIVE
-               ln -s ${ROOT_LANDING_DIR}/${DOMAIN} ${MYDOMDIR}/${_USER_STAGE}/${_LANDING} 
-               echoi "${ROOT_LANDING_DIR}/${DOMAIN} -> ${MYDOMDIR}/${_USER_STAGE}/${_LANDING}  created"
-            fi
-         fi
-      else
-         echow "${ROOT_LANDING_DIR} does not exists, so skipping"
-      fi
-                ;;
-   APP_LOGS)
-      echoi "Creating APP_LOGS directories..."
-      $(checkPathExist ${ROOT_LOG_DIR})
-      if [[ $? == 0 ]]; then
-         APP_LOGS=${ROOT_LOG_DIR}/${DOMAIN}
-         if [[ ! -d ${APP_LOGS} ]]; then
-            mkdir -p ${APP_LOGS}/app ${APP_LOGS}/wls
-            echoi "${APP_LOGS} created"
-         fi
-         if [[ -d ${APP_LOGS} ]]; then
-            # create simlink to USER_STAGE/LOGS
-            if [[ ! -d ${MYDOMDIR}/${_USER_STAGE}/logs  ]]; then
-               ln -s ${APP_LOGS} ${MYDOMDIR}/${_USER_STAGE}/logs 
-               echo "${APP_LOGS} -> ${MYDOMDIR}/${_USER_STAGE}/logs  created"
-            fi
-         fi
-      else
-         echow "${ROOT_LOG_DIR} does not exists, so skipping"
-      fi
-                ;;
-   COMMON)
-      echoi "Creating COMMON directories..."
-      $(checkPathExist ${COMMON_CONFIG_DIR})
-      if [[ $? == 0 ]]; then
-         if [[ ! -d ${MYDOMDIR}/${_USER_STAGE}/common ]]; then
-         ln -s ${COMMON_CONFIG_DIR} ${MYDOMDIR}/${_USER_STAGE}/common 
-         echo "${COMMON_CONFIG_DIR} -> ${MYDOMDIR}/${_USER_STAGE}/common  created"
-         fi
-      else
-         echow "${COMMON_CONFIG_DIR} does not exists, so skipping"
-      fi
-                ;;
-        *)
-                echoe "Unknown AREA - ${AREA} specifed. Can be APP_LANDING,APP_HOME,APP_LOGS" >&2
-                return 1
-                ;;
- esac
+createSymlinkIfRequired(){
+   local SFILE="${1}"
+   local LFILE="${2}"
+   
+   if [[ ! -e ${LFILE} ]]; then
+      ln -s "${SFILE}" "${LFILE}"
+      echoi "Symlink created ${SFILE} -> ${LFILE}"
+   fi
 }
 
 checkPathExist(){
@@ -763,7 +774,7 @@ recordDeployment() {
    else
       echoe "Could not find Archive Location  ${MYDOMDIR}/${ARCHIVE}." >&2
       return 1
-fi
+   fi
 
 }
 
@@ -806,7 +817,6 @@ recordReleaseType() {
 #
 # $1 - domain name $2 - version
 #
-
 retrieveReleaseType4Version() {
    typeset DOMAIN=${1}
    typeset PRVVRSN=${2}
@@ -1111,8 +1121,7 @@ writeOutJigsawConfig(){
    typeset SRC_FOLDER=${COMMON_CONFIG_DIR}/${DOMAIN}/jigsaw
 
    if [[ -r ${SRC_FOLDER} ]]; then
-      echow "#### WARNING!!   WARNING!!      WARNING!!   ######"
-      echow "The following files will be replaced from backed up configuration"
+      echoi "The following files will be replaced from backed up configuration"
       ls -R ${SRC_FOLDER}
       cp -R ${SRC_FOLDER}/* ${DEST_FOLDER}/
       return 0;

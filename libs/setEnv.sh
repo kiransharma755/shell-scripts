@@ -73,3 +73,5 @@ ROOT_LANDING_DIR='/app/icargo/ico_root/landing'
 # Root ICO_HOME directry. Domain specific folders will build from here
 ROOT_ICO_HOME_DIR='/app/icargo/ico_root/app'
 
+# Root mount where Persistent stores has to be mounted
+ROOT_STORE_DIR='/app/icargo/ico_root/store'
