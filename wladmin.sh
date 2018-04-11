@@ -602,10 +602,10 @@ EOF
 
 # restarts the weblogic instance
 restartInstance(){
-   INSTANCE="$1"
+   local INSTANCE="$1"
    echoi "Restarting instance : ${INSTANCE}"
-   stopInstance ${INSTANCE} "force"
-   startInstance ${INSTANCE} "wait"
+   stopInstance ${INSTANCE} 'force'
+   startInstance ${INSTANCE} 'wait'
    return $?
 }
 
