@@ -28,6 +28,7 @@ fi
 
 export CURRDIR=${DIRCMD}
 COMMON_CONFIG_DIR="${DIRCMD}/store"
+typeset -r ICOSRPT=$(basename ${0})
 
 # import the library scripts
 . ${DIRCMD}/libs/setEnv.sh
@@ -36,37 +37,25 @@ COMMON_CONFIG_DIR="${DIRCMD}/store"
 
 
 prt_usage() {
-   echo "" >&2
-   echo "USAGE:" >&2
-   echo " for Detailed help          : icoadmin help" >&2
-   echo "" >&2
-   echo " for Deployment         : icoadmin deploy <server name> <version>" >&2
-   echo "" >&2
-   echo " for Restore (previous version)  : icoadmin restore <server name>" >&2
-   echo "" >&2
-   echo " for Restore Patch               : icoadmin restorePatch <server name> <version>" >&2
-   echo "" >&2
-   echo " for Patch apply        : icoadmin patch <server name>" >&2
-   echo "" >&2
-   echo " for Restore Version (specific)  : icoadmin restore <server name> <version>" >&2
-   echo "" >&2
-   echo " for doing JSPC                  : icoadmin jspc <server name>" >&2
-   echo "" >&2
-   echo " for querying iCargo  version    : icoadmin version <server name>" >&2
-   echo "" >&2
-   echo " for querying deployment history : icoadmin history <server name>" >&2
-   echo "" >&2
-   echo " for enabling all logs on an instance : icoadmin elog <server name>" >&2
-   echo "" >&2
-   echo " for disabling all logs on an instance : icoadmin dlog <server name>" >&2
-   echo "" >&2
-   echo " The ear and iCargoConfig.zip should be placed in <domain>/user_stage/landing/app" >&2
-   echo "" >&2
-   echo " For patches the patch artefacts bundled as an EAR should be placed in  <domain>/user_stage/landing/app" >&2
-   echo "" >&2
-   echo "The <server name> can be any of the following. " >&2
-   echo "$(cat ${CONF_FILE} | grep -v '#' |awk '{ print $1 ,"\t" ,$2 ,"\t", $5 }' | grep `hostname`)">&2
-   echo "" >&2
+cat << EOF_USG
+   iCargo Deployment Adminstration
+   -------------------------------
+
+   Command Syntax : ${ICOSRPT} <operation> <domain-name | server-name> [<flags>]
+   
+   Deployment :
+         deploy        : Performs Full deployment of Application             ( ${ICOSRPT} deploy <domain-name> <version> )
+         patch         : Performs Patch deployment of Application            ( ${ICOSRPT} patch <domain-name> <version> )
+         restore       : Restores the previous/named version of Application  ( ${ICOSRPT} restore <domain-name> [<version>] )
+   
+   Miscellaneous :
+         version       : Dispalays the current version of the Application    ( ${ICOSRPT} version <domain-name> )
+         history       : Displays the deployment history for Environment     ( ${ICOSRPT} history <domain-name> )
+         jspc          : Triggers a JSPC compilation task for Environment    ( ${ICOSRPT} jspc <domain-name> )
+         help          : Shows detailed help information on usage            ( ${ICOSRPT} help )
+         
+EOF_USG
+
 }
 
 #
@@ -80,7 +69,7 @@ deploy() {
    if [[ $? -eq 0 ]]; then
       echoi "********************************************************"
       echoi "*                                                      *"
-      echoi "* Version ${VERSION} deployed succesfully!.            *"
+      echoi "* Version ${VERSION} deployed succesfully!.          *"
       echoi "*                                                      *"
       echoi "********************************************************"
       
@@ -106,32 +95,31 @@ applyPatch(){
    typeset SRCDIR="${MYDOMDIR}/${LANDING}"
    typeset TRGDIR="${MYDOMDIR}/${LIVE}"
    typeset ARCHDIR="${MYDOMDIR}/${ARCHIVE}"
-   typeset EARFOUND="no"
-   typeset CFGFOUND="no"
+   typeset EARFOUND='no'
+   typeset CFGFOUND='no'
 
    echoi "Applying Patches for domain ${DOMAIN}"
 
-   for file in $(find ${SRCDIR} \( -name icargo.ear -o -name iCargoConfig.zip \) ); do
+   for file in $(find ${SRCDIR} -maxdepth 1 \( -name icargo.ear -o -name icargo.ear.zip -o -name iCargoConfig.zip \) ); do
       if [[ ! -w ${file} ]]; then
          echoe "$file is not writeable ... exiting"
          return 1
       fi
       BASEFILE=$(basename ${file})
-      if [[ ${BASEFILE} == "icargo.ear" ]]; then
-         EARFOUND="yes"
+      if [[ ${BASEFILE} == 'icargo.ear' || ${BASEFILE} == 'icargo.ear.zip' ]]; then
+         EARFOUND='yes'
       fi
-      if [[ ${BASEFILE} == "iCargoConfig.zip" ]]; then
-         CFGFOUND="yes"
+      if [[ ${BASEFILE} == 'iCargoConfig.zip' ]]; then
+         CFGFOUND='yes'
       fi
    
    done
-   if [[ ${EARFOUND} = "yes" || ${CFGFOUND} = "yes" ]]; then
-   #Proceed
-      deploy "PATCH"
-      return $?
+   if [[ ${EARFOUND} == 'yes' || ${CFGFOUND} == 'yes' ]]; then
+      deploy 'PATCH'
+      return ${?}
    else
-      echoe "No icargo.ear or iCargoConfig.zip found to patch "
-      echoe "Only these artefacts are supported to patch"
+      echoe "No icargo.ear, icargo.ear.zip or iCargoConfig.zip found to patch."
+      echoe "Only these artefacts are supported to patch."
       return 1
    fi
 }
@@ -148,26 +136,32 @@ doDeploy() {
 
    #Move app from landing to live
    moveApp ${DOMAIN_NAME}
-   if [[ $? -ne 0 ]]; then
-      echoe "Could not move app to live"  >&2
-      return 1
+   typeset -i ANS=${?}
+   if [[ ${FULL_REL_TYPE} == ${TYPE} && ${ANS} -ne 0 ]]; then
+      echoe "Unable to copy iCargo application binary to live locations."
+      return ${ANS}
+   elif [[ ${PATCH_REL_TYPE} == ${TYPE} && ${ANS} -gt 1 ]]; then
+      echoe "Unable to copy iCargo application binary to live locations."
+      return ${ANS}
    fi
    
    moveConfig ${DOMAIN_NAME}
-   if [[ $? -ne 0 ]]; then
-      #Return with error only if this is a full deployment
-      if [[ ${TYPE} != ${PATCH_REL_TYPE} ]]; then
-         echoe "Could not move config zip to live" >&2
-         return 1
-      fi
+   typeset -i ANS=${?}
+   if [[ ${FULL_REL_TYPE} == ${TYPE} && ${ANS} -ne 0 ]]; then
+      echoe "Unable to copy iCargoConfig.zip to the live location."
+      return ${ANS}
+   elif [[ ${PATCH_REL_TYPE} == ${TYPE} && ${ANS} -gt 1 ]]; then
+      echoe "Unable to copy iCargoConfig.zip to the live location."
+      return ${ANS}
    fi
 
    #Record present version
    removeVersionId ${DOMAIN_NAME}
    recordVersionId ${DOMAIN_NAME} ${VERSION}
-   if [[ $? -ne 0 ]]; then
-      echoe "Could not record current version id" >&2
-      return 1
+   typeset -i ANS=${?}
+   if [[ ${ANS} -ne 0 ]]; then
+      echoe "Could not record current version id"
+      return ${ANS}
    fi
    
    #Record Previously Patch or Full 
@@ -484,7 +478,7 @@ if [[ ${CMD} != "help" ]]; then
    fi
 fi
 
-if [[ ${CMD} = "deploy" || ${CMD} = "restoreVersion" || ${CMD} = "patch" || ${CMD} = "restorePatch" ]]; then
+if [[ ${CMD} == "deploy" || ${CMD} == "restore" || ${CMD} == "patch" || ${CMD} == "restore-patch" ]]; then
    if [[ ${VERSION} == "" ]]; then
       echoe "A version for the application has to be specified !!"
       prt_usage
@@ -494,69 +488,67 @@ fi
 
 
 case $CMD in
-        deploy)
+        'deploy')
            deploy "FULL"
            exit $?
            ;;
-        restore)
-           typeset VERSION=$(retrievePreviousVersionId ${DOMAIN_NAME})
+        'restore')
+           if [[ -z ${VERSION} ]]; then
+              VERSION=$(retrievePreviousVersionId ${DOMAIN_NAME})
+           fi
            restoreVersion ${VERSION}
            exit $?
            ;;
-        restoreVersion)
-           restoreVersion ${VERSION}
-           exit $?
-           ;;
-        patch)
+        'patch')
            applyPatch ${DOMAIN_NAME}
            exit $?
            ;;
-        patchstruct)
+        'patchstruct')
            echo makePatchesHierarchy
            typeset AREA=${VERSION}
            makePatchesHierarchy ${DOMAIN_NAME} ${AREA}
            exit 1
            ;;
-        user_stage_struct)
+        'user_stage_struct')
            echo "makeUserStageHierarchy for ${DOMAIN_NAME}"
            makeUserStages ${DOMAIN_NAME}
            exit 1
            ;;
-        jspc)
+        'jspc')
            doJSPC ${DOMAIN_NAME}   
            exit 1
            ;;
-       version)
+       'version')
            typeset VERSION=$(retrieveCurrentVersionId ${DOMAIN_NAME})
            typeset PRVVERSION=$(retrievePreviousVersionId ${DOMAIN_NAME})
-	   if [[ ${PRVVERSION} == "" ]]; then
+	        if [[ ${PRVVERSION} == "" ]]; then
               PRVVERSION="unknown"
            fi
            echo "Version of iCargo in domain ${DOMAIN_NAME} is ${VERSION}"
            echo "Previous Version was ${PRVVERSION}"
            exit 1
            ;;
-        freeze)
+        'freeze')
            freeze ${DOMAIN_NAME}
            exit 1
            ;;
-        thaw)
+        'thaw')
            thaw ${DOMAIN_NAME}
            exit 1
            ;;
-        history)
+        'history')
            viewDeploymentHistory ${DOMAIN_NAME}
            exit 1
            ;;
-        dlog)
+        'dlog')
            disableICOLogging ${DOMAIN_NAME}
            exit 1
            ;;
-        elog)
+        'elog')
            enableICOLogging ${DOMAIN_NAME}
            exit 1
            ;;
-        help)
+        'help')
            showDetailedHelp
            exit 0
            ;;

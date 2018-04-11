@@ -15,8 +15,6 @@
 #########################################################################
 #set -x
 
-alias echo='echo -e'
-
 DIRCMD=`echo $0 | awk '$0 ~ /^\// { print }'`
 if [[ ${DIRCMD} != "" ]]; then
   DIRCMD=`dirname $0`
@@ -25,32 +23,31 @@ else
 fi
 export CURRDIR=${DIRCMD}
 export COMMON_CONFIG_DIR="${DIRCMD}/store"
+typeset -r JSWSRPT=$(basename ${0})
 
 . ${DIRCMD}/libs/setEnv.sh
 . ${DIRCMD}/libs/wladmin.functions.sh
 . ${DIRCMD}/libs/icoadmin.functions.sh
 
 prt_usage() {
-   echo "" >&2
-   echo "${BLUE_B}${YELLOW_F}${BOLD}USAGE:${NORM}" >&2
-   echo " for Detailed help          : ${BOLD}${GREEN_F}jsadmin help${NORM}" >&2
-   echo "" >&2
-   echo " for Deployment         : ${BOLD}jsadmin deploy <server name> <version>${NORM}" >&2
-   echo "" >&2
-   echo " for Restore (previous version)  : ${BOLD}jsadmin restore <server name>${NORM}" >&2
-   echo "" >&2
-   echo " for Restore Version (specific)  : ${BOLD}jsadmin restore <server name> <version>${NORM}" >&2
-   echo "" >&2
-   echo " for querying Jigsaw  version    : ${BOLD}jsadmin version <server name>${NORM}" >&2
-   echo "" >&2
-   echo " for querying deployment history : ${BOLD}jsadmin history <server name>${NORM}" >&2
-   echo "" >&2
-   echo " The jigsaw.war should be placed in <domain>/user_stage/landing/app" >&2
-   echo "" >&2
-   echo "" >&2
-   echo "${BOLD}The <server name> can be any of the following. ${NORM}" >&2
-   echo "${BOLD}$(cat ${CONF_FILE} | grep -v '#' |awk '{ print $1 ,"\t" ,$2 ,"\t", $5 }' | grep `hostname`)${NORM}">&2
-   echo "" >&2
+  local TNORM=$(printf ${NORM})
+  local TBOLD=$(printf ${BOLD})
+  cat << EOF_USG
+   Jigsaw EIP Deployment Adminstration
+   -------------------------------
+
+   Command Syntax : ${TBOLD}${JSWSRPT} <operation> <domain-name | server-name> [<flags>]${TNORM}
+   
+   Deployment :
+         deploy        : Performs Full deployment of Application             ( ${JSWSRPT} deploy <domain-name> <version> )
+         restore       : Restores the previous/named version of Application  ( ${JSWSRPT} restore <domain-name> [<version>] )
+   
+   Miscellaneous :
+         version       : Dispalays the current version of the Application    ( ${JSWSRPT} version <domain-name> )
+         history       : Displays the deployment history for Environment     ( ${JSWSRPT} history <domain-name> )
+         help          : Shows detailed help information on usage            ( ${JSWSRPT} help )
+         
+EOF_USG
 }
 
 
