@@ -33,7 +33,7 @@ export VERSION_FILE=".${APP}.ver"
 export JIGSAW_VERSION_FILE='jigsaw.ver'
 export TMPLOC='tmp/_WL_user'
 export ICARGO_WAR='icargo-web.war'
-export RELEASE_TYPE_FILE='.${APP}rel.typ'
+export RELEASE_TYPE_FILE=".${APP}rel.typ"
 
 export BOLD="\033[1m"
 export NORM="\033[0m"
@@ -150,38 +150,37 @@ moveConfig(){
 }
 
 cleanApp(){
-   typeset DOMAIN=${1}
-   typeset TYPE=${2}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-   typeset APPLOC=${MYDOMDIR}/${LIVE}/${APP}
-   typeset APPLOCHIDDEN=${MYDOMDIR}/${LIVE}/.${APP}
+   local DOMAIN="${1}"
+   local TYPE="${2}"
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   local APPLOC="${MYDOMDIR}/${LIVE}/${APP}"
+   local APPLOCHIDDEN="${MYDOMDIR}/${LIVE}/.${APP}"
 
    if [[ -d ${APPLOC} ]]; then
       rm -rf ${APPLOCHIDDEN}
       if [[ ${TYPE} == ${PATCH_REL_TYPE} ]]; then
          cp -R ${APPLOC} ${APPLOCHIDDEN}
          if [[ $? -ne 0 ]]; then
-            echoe "Could not back-up App location ${APPLOC}" >&2
+            echoe "Could not back-up App location ${APPLOC}"
             return 1
          fi
       else
          echoi "Cleaning App Folder"
          mv ${APPLOC} ${APPLOCHIDDEN}
       fi
-   
       if [[ $? -ne 0 ]]; then
-         echoe "Could not clean App location ${APPLOC}" >&2
+         echoe "Could not clean App location ${APPLOC}"
          return 1
       fi
    fi
 }
 
 cleanConfig(){
-   typeset DOMAIN=${1}
-   typeset TYPE=${2}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-   typeset CONFIGLOC=${MYDOMDIR}/${LIVE}/${ICOCONFIG}
-   typeset CONFIGLOCHIDDEN=${MYDOMDIR}/${LIVE}/.${ICOCONFIG}
+   local DOMAIN=${1}
+   local TYPE=${2}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   local CONFIGLOC="${MYDOMDIR}/${LIVE}/${ICOCONFIG}"
+   local CONFIGLOCHIDDEN="${MYDOMDIR}/${LIVE}/.${ICOCONFIG}"
 
    if [[ -d ${CONFIGLOC} ]]; then
       rm -rf ${CONFIGLOCHIDDEN}
@@ -204,22 +203,20 @@ cleanConfig(){
 }
 
 explodeEar(){
-   echoi "Exploding EAR ..."
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-
-   if [[ -n ${MYDOMDIR} ]]; then
-      
-      typeset FILE=${MYDOMDIR}/${LIVE}/icargo.ear
+   local DOMAIN=${1}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+	echoi "Exploding EAR ..."
+   if [[ -d ${MYDOMDIR} ]]; then
+      local FILE="${MYDOMDIR}/${LIVE}/icargo.ear"
       if [[ -w ${FILE} ]]; then
          typeset RCODE=`unzip -l ${FILE} | grep icargo/ | wc -l`
          if [[ $? -eq 0 ]]; then
             if [[ ${RCODE} -le 1 ]]; then
-                mkdir -p ${MYDOMDIR}/${LIVE}/${APP}
-                typeset OUTFILE=${MYDOMDIR}/${LIVE}/${APP}
+               mkdir -p "${MYDOMDIR}/${LIVE}/${APP}"
+               local OUTFILE="${MYDOMDIR}/${LIVE}/${APP}"
             else
-                echoi "The ear ${FILE} has an icargo sub-directory"   
-                typeset OUTFILE=${MYDOMDIR}/${LIVE}
+               echoi "The ear ${FILE} has an icargo sub-directory"   
+               local OUTFILE="${MYDOMDIR}/${LIVE}"
             fi
             unzip -oq ${FILE} -d ${OUTFILE}
             if [[ $? -ne 0 ]]; then
@@ -227,15 +224,15 @@ explodeEar(){
                return 1
             fi
          else
-            echoe "Could not unzip ${FILE}" >&2
+            echoe "Could not unzip ${FILE}"
             return 1
          fi
       else
-         echoe "No write permission on ${FILE}" >&2
+         echoe "No write permission on ${FILE}"
          return 1
       fi
    else
-      echoe "Cannot cd to ${MYDOMDIR}/${LIVE}" >&2
+      echoe "Cannot cd to ${MYDOMDIR}/${LIVE}"
       return 1
    fi
 }
@@ -245,7 +242,7 @@ explodeWar(){
    typeset DOMAIN=${1}
    typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
 
-   if [[ -n ${MYDOMDIR} ]]; then
+   if [[ -d ${MYDOMDIR} ]]; then
       typeset FILE=${MYDOMDIR}/${LIVE}/${APP}/icargo-web.war
       if [[ -w ${FILE} ]]; then
          typeset RCODE=`unzip -l ${FILE} | grep icargo-web/ | wc -l`
@@ -259,42 +256,42 @@ explodeWar(){
             fi
             unzip -oq ${FILE} -d ${OUTFILE}
             if [[ $? -ne 0 ]]; then
-               echoe "Could not unzip ${FILE}" >&2
+               echoe "Could not unzip ${FILE}"
                return 1
             else
                rm -f ${FILE}
                if [[ $? -ne 0 ]]; then
-                  echoe "Could not remove ${FILE}" >&2
+                  echoe "Could not remove ${FILE}"
                   return 1
                fi
             fi
         else
-           echoe "Could not unzip ${FILE}" >&2
+           echoe "Could not unzip ${FILE}"
            return 1
         fi
       else
-        echoe "No write permission on ${FILE}" >&2
+        echoe "No write permission on ${FILE}"
         return 1
       fi
    else
-      echoe "Cannot cd to ${MYDOMDIR}/${LIVE}" >&2
+      echoe "Cannot cd to ${MYDOMDIR}/${LIVE}"
       return 1
    fi
 }
 
 explodeConfig(){
    echoi "Exploding iCargoConfig ..."
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-
+   local DOMAIN=${1}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+	
    if [[ -n ${MYDOMDIR} ]]; then
-      typeset FILE=${MYDOMDIR}/${LIVE}/${ICOCONFIG}.zip
+      local FILE="${MYDOMDIR}/${LIVE}/${ICOCONFIG}.zip"
       if [[ -w ${FILE} ]]; then
          typeset RCODE=`unzip -l ${FILE} | grep ${ICOCONFIG}/ | wc -l`
          if [[ $? -eq 0 ]]; then
             if [[ ${RCODE} -le 1 ]]; then
-               mkdir ${MYDOMDIR}/${LIVE}/${ICOCONFIG}
-               typeset OUTFILE=${MYDOMDIR}/${LIVE}/${ICOCONFIG}
+               mkdir "${MYDOMDIR}/${LIVE}/${ICOCONFIG}"
+               local OUTFILE="${MYDOMDIR}/${LIVE}/${ICOCONFIG}"
             else
                echoi "The zip ${FILE} has an ${ICOCONFIG} sub-directory"
                typeset OUTFILE=${MYDOMDIR}/${LIVE}
@@ -356,26 +353,25 @@ retrievePreviousVersionId(){
 }
 
 archivePreviousApp(){
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-   typeset PRVVRSN=$(retrievePreviousVersionId ${DOMAIN})
-   if [ -n "${PRVVRSN}" ]; then
-      typeset CURRENTAPPDIR=${MYDOMDIR}/${LIVE}/${APP}
+   local DOMAIN=${1}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   local PRVVRSN=$(retrievePreviousVersionId ${DOMAIN})
+   if [[ -n "${PRVVRSN}" ]]; then
+      local CURRENTAPPDIR="${MYDOMDIR}/${LIVE}/${APP}"
       if [[ -d ${CURRENTAPPDIR} ]]; then
          if [[ ! -d ${MYDOMDIR}/${ARCHIVE}/${PRVVRSN} ]]; then
             mkdir -p ${MYDOMDIR}/${ARCHIVE}/${PRVVRSN}
          fi
          typeset DESTFILE=${MYDOMDIR}/${ARCHIVE}/${PRVVRSN}
          cp -pr ${CURRENTAPPDIR} ${DESTFILE}   
-            if [[ $? == 0 ]]; then
-               echoi "Moved -> ${CURRENTAPPDIR} to ${DESTFILE}"
-            else
-               return 1
-            fi
+         if [[ $? -ne 0 ]]; then
+            echoe "Copy failed ${CURRENTAPPDIR} to ${DESTFILE}"
+				return 1
+         fi
       else
-         echoe "No write permission on ${CURRENTAPPDIR} or directory does not exist" >&2
+         echoe "No write permission on ${CURRENTAPPDIR} or directory does not exist"
       fi      
-      CURDIR=$(pwd) 
+      CURDIR=$(pwd)
       if [[ -d ${DESTFILE}/${APP}/icargo-web} ]]; then
          cd ${DESTFILE}/${APP}/icargo-web
          jar -cf icargo-web.war .
@@ -394,7 +390,7 @@ archivePreviousApp(){
       typeset FILE=${DESTFILE}/icargo.ear
       echoi "Archived iCargo to ${FILE}"
    else
-      echow "No previous iCargo to archive... So skipping"
+      echow "No previous iCargo to archive."
    fi
    return 0
 }
@@ -520,9 +516,8 @@ cleanTemp(){
    ADMSERVER="I"
    typeset INSTANCES=$(findAllInstancesForDomain ${DOMAIN} ${LOCALINST} ${ADMSERVER})
    for INSTANCE in ${INSTANCES}; do
-      typeset TMPMDIR=${MYDOMDIR}/servers/${INSTANCE}/${TMPLOC}
-
-      if [[ -x ${TMPMDIR} ]]; then
+      local TMPMDIR="${MYDOMDIR}/servers/${INSTANCE}/${TMPLOC}"
+      if [[ -d ${TMPMDIR} ]]; then
          rm -rf ${TMPMDIR}
          if [[ $? == 0 ]]; then
             echoi "Cleaned Temp"                
@@ -712,7 +707,6 @@ makeDirectories(){
 createSymlinkIfRequired(){
    local SFILE="${1}"
    local LFILE="${2}"
-   
    if [[ ! -e ${LFILE} ]]; then
       ln -s "${SFILE}" "${LFILE}"
       echoi "Symlink created ${SFILE} -> ${LFILE}"
@@ -800,23 +794,22 @@ viewDeploymentHistory() {
 # $1 - domain name, $2 - release type
 #
 recordReleaseType() {
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-   typeset RELTYPE=${2}
-   if [[ -n ${MYDOMDIR} ]]; then
-      typeset FILE=${MYDOMDIR}/${LIVE}/${RELEASE_TYPE_FILE}
+   local DOMAIN=${1}
+   local RELTYPE=${2}
+	local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   if [[ -d ${MYDOMDIR} ]]; then
+      local FILE="${MYDOMDIR}/${LIVE}/${RELEASE_TYPE_FILE}"
       echo ${RELTYPE} > ${FILE}
       if [[ $? == 0 ]]; then
-         echoi "Recorded ${RELTYPE} in ${FILE}."
          return 0
       else
+			echoi "Unable to record release type info : ${FILE}"
          return 1
       fi
    else
-      echoe "Domain directory ${MYDOMDIR} is not correct." >&2
+      echoe "Domain directory ${MYDOMDIR} is not correct."
       return 1
    fi
-
 }
 
 #
@@ -834,7 +827,7 @@ retrieveReleaseType4Version() {
          return 1
       fi
       typeset RELTYPE=$(cat ${FILE})
-      echoi "Release type -> ${RELTYPE}"
+      echo ${RELTYPE}
    else
       echoe "Domain directory ${MYDOMDIR} or version ${PRVVRSN} is not correct." >&2
       return 1
@@ -843,26 +836,27 @@ retrieveReleaseType4Version() {
 }
 
 archivePreviousReleaseType(){
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-   typeset PRVVRSN=$(retrievePreviousVersionId ${DOMAIN})
+   local DOMAIN=${1}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   local PRVVRSN=$(retrievePreviousVersionId ${DOMAIN})
 
-   if [[ -x ${MYDOMDIR} ]]; then
-      typeset FILE=${MYDOMDIR}/${LIVE}/${RELEASE_TYPE_FILE}
+   if [[ -d ${MYDOMDIR} ]]; then
+      local FILE="${MYDOMDIR}/${LIVE}/${RELEASE_TYPE_FILE}"
       if [[ -w ${FILE} ]]; then
-         mkdir -p ${MYDOMDIR}/${ARCHIVE}/${PRVVRSN}
-         typeset DESTFILE=${MYDOMDIR}/${ARCHIVE}/${PRVVRSN}/${RELEASE_TYPE_FILE}
+         mkdir -p "${MYDOMDIR}/${ARCHIVE}/${PRVVRSN}"
+         local DESTFILE="${MYDOMDIR}/${ARCHIVE}/${PRVVRSN}/${RELEASE_TYPE_FILE}"
          mv ${FILE} ${DESTFILE}
-         if [[ $? == 0 ]]; then
-            echoi "Moved ${FILE} to ${DESTFILE}"
-            return 0
-         else
+         if [[ $? -ne 0 ]]; then
+            echoe "Unable to archive previous release type ${FILE} to ${DESTFILE}"
             return 1
          fi
       else
-         echoe "No write permission on ${FILE} or file does not exist" >&2
+         echow "No previous release type info found." 
       fi
       return 0
+	else
+		echoe "Domain directory absent ${MYDOMDIR}"
+		return 1
    fi
 }
 
@@ -1247,4 +1241,3 @@ recordJigsawDeployment() {
    fi
 
 }
-

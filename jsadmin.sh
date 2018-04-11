@@ -163,7 +163,7 @@ VERSION=${3}
 OPTION=${4}
 
 if [[ ${CMD} == "" ]]; then
-   echo "${RED_F}A command has to be specified !!${NORM}"
+   echoe "A command has to be specified !"
    prt_usage
    exit 1
 fi
@@ -171,7 +171,7 @@ fi
 #Not checks for help !
 if [[ ${CMD} != "help" ]]; then
    if [[ ${DOMAIN_NAME} == "" ]]; then
-      echo "A domain name has to be specified !!"
+      echoe "A domain name has to be specified !"
       prt_usage
       exit 1
    fi
@@ -199,20 +199,20 @@ fi
 
 
 case $CMD in
-   deploy)
+   'deploy')
            deploy "FULL"
            exit $?
            ;;
-   restore)
+   'restore')
             typeset VERSION=$(retrievePreviousJigsawVersionId ${DOMAIN_NAME})
             restoreVersion ${VERSION}
             exit $?
             ;;
-   restoreVersion)
+   'restoreVersion')
             restoreVersion ${VERSION}
             exit $?
             ;;        
-   version)
+   'version')
             typeset VERSION=$(retrieveCurrentJigsawVersionId ${DOMAIN_NAME})
             typeset PRVVERSION=$(retrievePreviousJigsawVersionId ${DOMAIN_NAME})
             if [[ ${PRVVERSION} == "" ]]; then
@@ -222,12 +222,12 @@ case $CMD in
             echo "Previous Version was ${PRVVERSION}"
             exit 1
             ;;        
-   history)
+   'history')
             viewJigsawDeploymentHistory ${DOMAIN_NAME}
             exit 1
             ;;        
-      help)
-            showDetailedHelp
+      'help')
+            prt_usage
             exit 0
             ;;
    *)

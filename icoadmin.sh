@@ -167,45 +167,46 @@ doDeploy() {
    #Record Previously Patch or Full 
    archivePreviousReleaseType ${DOMAIN_NAME}
    if [[ $? -ne 0 ]]; then
-      echoe "Could not Archive Previous release type" >&2
+      echoe "Could not Archive Previous release type"
       #return 1
    fi   
    
    #Patch or Full 
    recordReleaseType ${DOMAIN_NAME} ${TYPE}
    if [[ $? -ne 0 ]]; then
-      echoe "Could not record release type" >&2
+      echoe "Could not record release type"
       return 1
    fi      
    
    #Archive previous app
    archivePreviousApp ${DOMAIN_NAME}
    if [[ $? -ne 0 ]]; then
-      echoe "Could not Archive Previous version of App" >&2
+      echoe "Could not Archive Previous version of App"
       return 1
    fi
+	
    archivePreviousConfig ${DOMAIN_NAME}
    if [[ $? -ne 0 ]]; then
-      echoe "Could not Archive Previous version of App Config" >&2
+      echoe "Could not Archive Previous version of App Config"
       return 1
    fi
  
    cleanApp ${DOMAIN_NAME} ${TYPE}
    if [[ $? -ne 0 ]]; then
-      echoe "Could not clean  App location" >&2
+      echoe "Could not clean  App location"
       return 1
    fi
 
    cleanConfig ${DOMAIN_NAME} ${TYPE}
    if [[ $? -ne 0 ]]; then
-      echoe "Could not clean  Config location" >&2
+      echoe "Could not clean  Config location"
       return 1
    fi
    
    #Explode KABOOM !!!
    explodeEar ${DOMAIN_NAME}
    if [[ $? -ne 0 ]]; then
-      echoe "Could not Explode EAR" >&2
+      echoe "Could not Explode EAR"
       return 1
    fi
    
@@ -213,7 +214,7 @@ doDeploy() {
    if [[ $? -ne 0 ]]; then
       #Return  only if not a patch release
       if [[ ${TYPE} != ${PATCH_REL_TYPE} ]]; then
-         echoe "Could not Explode WAR" >&2
+         echoe "Could not Explode WAR"
          return 1
       fi
    fi
@@ -222,17 +223,16 @@ doDeploy() {
    if [[ $? -ne 0 ]]; then
       #Return  only if not a patch release
       if [[ ${TYPE} != ${PATCH_REL_TYPE} ]]; then
-         echoe "Could not Explode Config ZIP" >&2
+         echoe "Could not Explode Config ZIP"
          return 1
       fi
    fi
-   
    #Change context path and web-app
    #Change only if not a patch release
    if [[ ${TYPE} != ${PATCH_REL_TYPE} ]]; then
       changeWebAppAndContext ${DOMAIN_NAME}
       if [[ $? -ne 0 ]]; then
-         echoe "Could not Change web-app and context in application.xml" >&2
+         echoe "Could not Change web-app and context in application.xml"
          return 1
       fi
    fi
@@ -240,19 +240,19 @@ doDeploy() {
    #Replace Config from maintained config
    writeOutConfig ${DOMAIN_NAME}
    if [[ $? -ne 0 ]]; then
-      echow "No maintained iCargoConfig folder found." >&2
+      echow "No maintained iCargoConfig folder found."
    fi
         
    #Replace Config from maintained host specific config
    writeOutHostConfig ${DOMAIN_NAME}
    if [[ $? -ne 0 ]]; then
-       echow "No host specific config folder present." >&2
+       echow "No host specific config folder present."
    fi
 
    #Replace Ear files from maintained application
    writeOutEar ${DOMAIN_NAME}
    if [[ $? -ne 0 ]]; then
-      echow "Could not replace ear files with stored outer-level defaults" >&2
+      echow "Could not replace ear files with stored outer-level defaults"
    fi
 
    #Move current ear and config zip to archive
@@ -260,7 +260,7 @@ doDeploy() {
    #Raise error if not patch release
    if [[ ${TYPE} != ${PATCH_REL_TYPE} ]]; then
       if [[ $? -ne 0 ]]; then
-         echoe "Could not Archive Current version of App" >&2
+         echoe "Could not Archive Current version of App"
          return 1
       fi
    fi
@@ -269,7 +269,7 @@ doDeploy() {
    #Raise error if not patch release
    if [[ ${TYPE} != ${PATCH_REL_TYPE} ]]; then
       if [[ $? -ne 0 ]]; then
-         echoe "Could not Archive Current version of App Config ZIP" >&2
+         echoe "Could not Archive Current version of App Config ZIP"
          return 1
       fi
    fi
@@ -278,19 +278,19 @@ doDeploy() {
    cleanTemp ${DOMAIN_NAME}
 
    if [[ $? -ne 0 ]]; then
-      echow "Could not Clean Temp Location for all instances" >&2
-      echow "Please delete the tmp/_WL_user location of each server instance manually.">&2
+      echow "Could not Clean Temp Location for all instances"
+      echow "Please delete the tmp/_WL_user location of each server instance manually."
       return 0
    fi
 
    if [[ ${OPTION} != "nojspc" || ${OPTION} != "NOJSPC" ]]; then
       doJSPC ${DOMAIN_NAME}
       if [[ $? -ne 0 ]]; then
-         echow "Could not do JSPC" >&2
+         echow "Could not do JSPC"
          return 0
       fi
    else
-      echoi "Not doing JSPC "
+      echoi "Not doing JSPC"
    fi
    
 }
@@ -309,6 +309,11 @@ restoreVersion() {
       return $?
    fi
    
+	if [[ ${RELTYPE} != ${PATCH_REL_TYPE} || ${RELTYPE} != ${FULL_REL_TYPE} ]]; then
+		echoe "Invalid release type ${RELTYPE} can be ${PATCH_REL_TYPE} or ${FULL_REL_TYPE}"
+		return 1
+	fi
+	
    typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN_NAME})
    typeset SRC=${MYDOMDIR}/${ARCHIVE}/${PRVVRSN}/icargo.ear
    typeset DST=${MYDOMDIR}/${LANDING}

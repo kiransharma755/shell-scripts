@@ -11,6 +11,7 @@ store/
 wladmin
 icoadmin
 txpadmin
+jsadmin
 
 # Don`t track jar files
 *.jar
