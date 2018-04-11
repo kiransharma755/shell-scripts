@@ -29,11 +29,11 @@ export INTF="${_USER_STAGE}/${_INTF}"
 export ICOCONFIG='iCargoConfig'
 export APP="${APP_DEP_NAME:-icargo}"
 export APP_CONFIG="${ICOCONFIG}"
-export VERSION_FILE="${APP}.ver"
+export VERSION_FILE=".${APP}.ver"
 export JIGSAW_VERSION_FILE='jigsaw.ver'
 export TMPLOC='tmp/_WL_user'
 export ICARGO_WAR='icargo-web.war'
-export RELEASE_TYPE_FILE='.icargorel.typ'
+export RELEASE_TYPE_FILE='.${APP}rel.typ'
 
 export BOLD="\033[1m"
 export NORM="\033[0m"
@@ -51,74 +51,102 @@ export GREEN_F="\033[32m";
 export GREEN_B="\033[42m"
 export WHITE_F="\033[37m";
 export WHITE_B="\033[47m"
-export PATCH_REL_TYPE="PATCH"
+typeset -r PATCH_REL_TYPE='PATCH'
+typeset -r FULL_REL_TYPE='FULL'
 
 #
 # $1 - domain name, $2 - version
 #
 recordVersionId() {
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-   echo ${MYDOMDIR}
-   typeset VERSION=${2}
-   if [[ -n ${MYDOMDIR} ]]; then
-      typeset FILE=${MYDOMDIR}/${LIVE}/${VERSION_FILE}
+   local DOMAIN=${1}
+   local VERSION=${2}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   if [[ -d ${MYDOMDIR} ]]; then
+      local FILE="${MYDOMDIR}/${LIVE}/${VERSION_FILE}"
       echo ${VERSION} > ${FILE}
       if [[ $? == 0 ]]; then
-          echoi "Recorded ${VERSION} in ${FILE}."
           return 0
        else
+          echoe "Unable to record version info ${VERSION} in ${FILE}."
           return 1
       fi
    else
       echoe "Domain directory ${MYDOMDIR} is not correct." >&2
-      return 1
+      return 2
    fi
 
 }
 
 removeVersionId() {
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-
-   if [[ -n ${MYDOMDIR} ]]; then
-      typeset FILE=${MYDOMDIR}/${LIVE}/${VERSION_FILE}
-      typeset OUTFILE=${FILE}.old
+   local DOMAIN=${1}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   if [[ -d ${MYDOMDIR} ]]; then
+      local FILE="${MYDOMDIR}/${LIVE}/${VERSION_FILE}"
+      local OUTFILE="${FILE}.old"
       if [ -e ${FILE} ]; then
          mv ${FILE} ${OUTFILE} 
          if [[ $? == 0 ]]; then
-            echoi "Renamed ${FILE} to ${OUTFILE}"
             return 0
          else
+            echoe "Unable to rename version file : ${FILE} to ${OUTFILE}"
             return 1
          fi
       fi
    else
-      echoe "Domain directory ${MYDOMDIR} is not correct." >&2
-      return 1
+      echoe "Domain directory ${MYDOMDIR} is not correct."
+      return 2
    fi
 }
 
 moveApp(){
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-
-   if [[ -x ${MYDOMDIR} ]]; then
-      typeset FILE=${MYDOMDIR}/${LANDING}/icargo.ear
-      if [[ -w ${FILE} ]]; then
-         typeset DESTFILE=${MYDOMDIR}/${LIVE}/icargo.ear
-         cp ${FILE} ${DESTFILE}
-         if [[ $? == 0 ]]; then
-            echoi "Moved ${FILE} to ${DESTFILE}"
-            return 0
-         else
-            return 1
-         fi
-      else
-         echoe "No write permission on ${FILE} or file does not exist" >&2
-         return 1
-      fi
+   local DOMAIN="${1}"
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   if [[ ! -w "${MYDOMDIR}/${LIVE}" ]]; then
+      echoe "No write permission on the domain live location : ${MYDOMDIR}/${LIVE}"
+      return 3
    fi
+   
+   local SFILE="${MYDOMDIR}/${LANDING}/icargo.ear"
+   [[ ! -e ${SFILE} ]] && SFILE="${MYDOMDIR}/${LANDING}/icargo.ear.zip"
+   if [[ -r ${SFILE} ]]; then
+      local DESTFILE="${MYDOMDIR}/${LIVE}/icargo.ear"
+      cp ${SFILE} ${DESTFILE}
+      typeset -i ANS=${?}
+      if [[ ${ANS} -eq 0 ]]; then
+         return 0
+      else
+         echoe "Copy failed for iCargo application binary. ${SFILE} to ${DESTFILE}"
+         return 2
+      fi
+   else
+      echow "iCargo Application binary absent or not readable : ${SFILE}."
+      return 1
+   fi
+}
+
+moveConfig(){
+   local DOMAIN=${1}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   if [[ ! -w "${MYDOMDIR}/${LIVE}" ]]; then
+      echoe "No write permission on the domain live location : ${MYDOMDIR}/${LIVE}"
+      return 3
+   fi
+   
+   local SFILE="${MYDOMDIR}/${LANDING}/${ICOCONFIG}.zip"
+   if [[ -r ${SFILE} ]]; then
+      local DESTFILE="${MYDOMDIR}/${LIVE}/${ICOCONFIG}.zip"
+      cp ${SFILE} ${DESTFILE}
+      if [[ $? == 0 ]]; then
+         return 0
+      else
+         echoe "Copy failed for iCargo Application Config. ${SFILE} to ${DESTFILE}"
+         return 2
+      fi
+   else
+      echow "iCargo Application Config absent or not readable : ${SFILE}."
+      return 1
+   fi
+   
 }
 
 cleanApp(){
@@ -254,28 +282,6 @@ explodeWar(){
    fi
 }
 
-moveConfig(){
-typeset DOMAIN=${1}
-typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-
-if [[ -x ${MYDOMDIR} ]]; then
-      typeset FILE=${MYDOMDIR}/${LANDING}/${ICOCONFIG}.zip
-      if [[ -w ${FILE} ]]; then
-         typeset DESTFILE=${MYDOMDIR}/${LIVE}/${ICOCONFIG}.zip
-         cp ${FILE} ${DESTFILE}
-         if [[ $? == 0 ]]; then
-      echoi "Moved ${FILE} to ${DESTFILE}"
-      return 0
-   else
-      return 1
-   fi
-      else
-         echoe "No write permission on ${FILE} or file does not exist" >&2
-         return 1
-      fi
-fi
-}
-
 explodeConfig(){
    echoi "Exploding iCargoConfig ..."
    typeset DOMAIN=${1}
@@ -332,22 +338,20 @@ retrieveCurrentVersionId(){
 }
 
 retrievePreviousVersionId(){
-   typeset DOMAIN=${1}
-   typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-
-   if [[ -n ${MYDOMDIR} ]]; then
-      typeset FILE=${MYDOMDIR}/${LIVE}/${VERSION_FILE}.old
-      
+   local DOMAIN=${1}
+   local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
+   if [[ -d ${MYDOMDIR} ]]; then
+      local FILE=${MYDOMDIR}/${LIVE}/${VERSION_FILE}.old
       if [ -e ${FILE} ]; then
          echo `cat ${FILE}`
          return 0
       else
-         echoe "File ${FILE} does not exist." >&2
+         echow "Previous release version absent : ${FILE}"
          return 1
       fi
    else
       echoe "Domain directory ${MYDOMDIR} is not correct." >&2
-      return 1
+      return 2
    fi
 }
 
@@ -611,7 +615,7 @@ makeDirectories(){
  fi
  case ${AREA} in
       'APP_HOME')
-         echo "Creating APP_HOME directories..."
+         echoi "Creating APP_HOME directories..."
          $(checkPathExist ${ROOT_ICO_HOME_DIR})
          if [[ $? == 0 ]]; then
             local APP_HOME_LIVE="${ROOT_ICO_HOME_DIR}/${DOMAIN}/${_LIVE}/${_APP}"
@@ -688,11 +692,12 @@ makeDirectories(){
             fi
             createSymlinkIfRequired "${DOMAIN_STORE}" "${MYDOMDIR}/${_USER_STAGE}/store"
             local ALLINSTS=$(findAllInstancesForDomain ${DOMAIN})
-            local JPREFS="${DOMAIN_STORE}/javaPrefs"
             for INSTANCE in ${ALLINSTS}; do
-               mkdir -p "${JPREFS}/${INSTANCE}"/{.java,.systemPrefs}
+               mkdir -p "${DOMAIN_STORE}/${INSTANCE}/jms/cache"
+               mkdir -p "${DOMAIN_STORE}/${INSTANCE}/javaPrefs"/{.java,.systemPrefs}
+               mkdir "${DOMAIN_STORE}/${INSTANCE}/ebl"
             done
-            echoi "Created Java preference directories to ${MYDOMDIR}/${_USER_STAGE}/store."
+            echoi "Created Java preference, JMS store directories to ${MYDOMDIR}/${_USER_STAGE}/store."
          else
             echow "${ROOT_STORE_DIR} does not exists, so skipping"
          fi

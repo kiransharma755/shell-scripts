@@ -69,7 +69,7 @@ deploy() {
    if [[ $? -eq 0 ]]; then
       echoi "********************************************************"
       echoi "*                                                      *"
-      echoi "* Version ${VERSION} deployed succesfully!.            *"
+      echoi "* Version ${VERSION} deployed succesfully!.          *"
       echoi "*                                                      *"
       echoi "********************************************************"
       
@@ -95,32 +95,31 @@ applyPatch(){
    typeset SRCDIR="${MYDOMDIR}/${LANDING}"
    typeset TRGDIR="${MYDOMDIR}/${LIVE}"
    typeset ARCHDIR="${MYDOMDIR}/${ARCHIVE}"
-   typeset EARFOUND="no"
-   typeset CFGFOUND="no"
+   typeset EARFOUND='no'
+   typeset CFGFOUND='no'
 
    echoi "Applying Patches for domain ${DOMAIN}"
 
-   for file in $(find ${SRCDIR} \( -name icargo.ear -o -name iCargoConfig.zip \) ); do
+   for file in $(find ${SRCDIR} -maxdepth 1 \( -name icargo.ear -o -name icargo.ear.zip -o -name iCargoConfig.zip \) ); do
       if [[ ! -w ${file} ]]; then
          echoe "$file is not writeable ... exiting"
          return 1
       fi
       BASEFILE=$(basename ${file})
-      if [[ ${BASEFILE} == "icargo.ear" ]]; then
-         EARFOUND="yes"
+      if [[ ${BASEFILE} == 'icargo.ear' || ${BASEFILE} == 'icargo.ear.zip' ]]; then
+         EARFOUND='yes'
       fi
-      if [[ ${BASEFILE} == "iCargoConfig.zip" ]]; then
-         CFGFOUND="yes"
+      if [[ ${BASEFILE} == 'iCargoConfig.zip' ]]; then
+         CFGFOUND='yes'
       fi
    
    done
-   if [[ ${EARFOUND} = "yes" || ${CFGFOUND} = "yes" ]]; then
-   #Proceed
-      deploy "PATCH"
-      return $?
+   if [[ ${EARFOUND} == 'yes' || ${CFGFOUND} == 'yes' ]]; then
+      deploy 'PATCH'
+      return ${?}
    else
-      echoe "No icargo.ear or iCargoConfig.zip found to patch "
-      echoe "Only these artefacts are supported to patch"
+      echoe "No icargo.ear, icargo.ear.zip or iCargoConfig.zip found to patch."
+      echoe "Only these artefacts are supported to patch."
       return 1
    fi
 }
@@ -137,26 +136,32 @@ doDeploy() {
 
    #Move app from landing to live
    moveApp ${DOMAIN_NAME}
-   if [[ $? -ne 0 ]]; then
-      echoe "Could not move app to live"  >&2
-      return 1
+   typeset -i ANS=${?}
+   if [[ ${FULL_REL_TYPE} == ${TYPE} && ${ANS} -ne 0 ]]; then
+      echoe "Unable to copy iCargo application binary to live locations."
+      return ${ANS}
+   elif [[ ${PATCH_REL_TYPE} == ${TYPE} && ${ANS} -gt 1 ]]; then
+      echoe "Unable to copy iCargo application binary to live locations."
+      return ${ANS}
    fi
    
    moveConfig ${DOMAIN_NAME}
-   if [[ $? -ne 0 ]]; then
-      #Return with error only if this is a full deployment
-      if [[ ${TYPE} != ${PATCH_REL_TYPE} ]]; then
-         echoe "Could not move config zip to live" >&2
-         return 1
-      fi
+   typeset -i ANS=${?}
+   if [[ ${FULL_REL_TYPE} == ${TYPE} && ${ANS} -ne 0 ]]; then
+      echoe "Unable to copy iCargoConfig.zip to the live location."
+      return ${ANS}
+   elif [[ ${PATCH_REL_TYPE} == ${TYPE} && ${ANS} -gt 1 ]]; then
+      echoe "Unable to copy iCargoConfig.zip to the live location."
+      return ${ANS}
    fi
 
    #Record present version
    removeVersionId ${DOMAIN_NAME}
    recordVersionId ${DOMAIN_NAME} ${VERSION}
-   if [[ $? -ne 0 ]]; then
-      echoe "Could not record current version id" >&2
-      return 1
+   typeset -i ANS=${?}
+   if [[ ${ANS} -ne 0 ]]; then
+      echoe "Could not record current version id"
+      return ${ANS}
    fi
    
    #Record Previously Patch or Full 
@@ -473,7 +478,7 @@ if [[ ${CMD} != "help" ]]; then
    fi
 fi
 
-if [[ ${CMD} = "deploy" || ${CMD} = "restoreVersion" || ${CMD} = "patch" || ${CMD} = "restorePatch" ]]; then
+if [[ ${CMD} == "deploy" || ${CMD} == "restore" || ${CMD} == "patch" || ${CMD} == "restore-patch" ]]; then
    if [[ ${VERSION} == "" ]]; then
       echoe "A version for the application has to be specified !!"
       prt_usage
