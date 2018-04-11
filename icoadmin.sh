@@ -500,6 +500,11 @@ case $CMD in
         'restore')
            if [[ -z ${VERSION} ]]; then
               VERSION=$(retrievePreviousVersionId ${DOMAIN_NAME})
+				  typeset -i ANS=${?}
+              if [[ ${ANS} -ne 0 ]]; then
+					  echoe "Unable to get the previous version for domain ${DOMAIN_NAME}"
+					  exit ${ANS}
+				  fi
            fi
            restoreVersion ${VERSION}
            exit $?
