@@ -66,21 +66,24 @@ deploy() {
    typeset TYPE=${1}
    
    doDeploy ${TYPE}
+   local TNORM=$(printf ${NORM})
+   local TGREEN=$(printf ${GREEN_F})
+   local TRED=$(printf ${RED_F})
+   local TBOLD=$(printf ${BOLD})
    if [[ $? -eq 0 ]]; then
-      echoi "********************************************************"
-      echoi "*                                                      *"
-      echoi "* Version ${VERSION} deployed succesfully!.          *"
-      echoi "*                                                      *"
-      echoi "********************************************************"
-      
+cat << EOF_S
+${TGREEN}+--------------------------------------------------------+
+      Version ${TBOLD}${VERSION}${TNORM}${TGREEN} deployed succesfully!.
++--------------------------------------------------------+${TNORM}
+EOF_S
       recordDeployment ${DOMAIN_NAME} ${VERSION} ${TYPE}
       return 0
    else
-      echoe "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-      echoe "X                                                      X"
-      echoe "X FAILED deploying version ${VERSION}.                 X"
-      echoe "X                                                      X"
-      echoe "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+cat << EOF_F
+${TRED}+--------------------------------------------------------+
+      Failed deploying version ${VERSION}
++--------------------------------------------------------+${TNORM}
+EOF_F
       return 1
    fi
 }
@@ -239,22 +242,11 @@ doDeploy() {
 
    #Replace Config from maintained config
    writeOutConfig ${DOMAIN_NAME}
-   if [[ $? -ne 0 ]]; then
-      echow "No maintained iCargoConfig folder found."
-   fi
-        
    #Replace Config from maintained host specific config
    writeOutHostConfig ${DOMAIN_NAME}
-   if [[ $? -ne 0 ]]; then
-       echow "No host specific config folder present."
-   fi
-
    #Replace Ear files from maintained application
    writeOutEar ${DOMAIN_NAME}
-   if [[ $? -ne 0 ]]; then
-      echow "Could not replace ear files with stored outer-level defaults"
-   fi
-
+   
    #Move current ear and config zip to archive
    archiveCurrentApp ${DOMAIN_NAME}
    #Raise error if not patch release
@@ -386,9 +378,9 @@ doFreeze(){
    typeset URL=${2}
    wget -O /dev/null -o /dev/null --post-data="action=deactivate&password=icargo123" "${URL}"
    if [[ $? -ne 0 ]]; then
-      echoe "Deactivating ${INST} failed" >&2
+      echoe "Deactivating ${INST} failed"
    else
-      echoi "${INST} is now inactive" >&2
+      echoi "${INST} is now inactive"
     fi
    return 0
 }
@@ -431,7 +423,7 @@ thaw(){
          done
          return $ANS
       else
-         echoe "No instances for the domain OR instance name ${NAME} in this box" >&2
+         echoe "No instances for the domain OR instance name ${NAME} in this box"
          return 1
       fi
    fi   
@@ -442,9 +434,9 @@ doThaw(){
    typeset URL=${2}
    wget -O /dev/null -o /dev/null --post-data="action=activate&password=icargo123" "${URL}"
    if [[ $? -ne 0 ]]; then
-      echoe "Activating ${INST} failed" >&2
+      echoe "Activating ${INST} failed"
    else
-      echoi "${INST} is now active" >&2
+      echoi "${INST} is now active"
     fi
    return 0
 }

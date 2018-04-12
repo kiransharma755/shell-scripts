@@ -35,22 +35,13 @@ export TMPLOC='tmp/_WL_user'
 export ICARGO_WAR='icargo-web.war'
 export RELEASE_TYPE_FILE=".${APP}rel.typ"
 
-export BOLD="\033[1m"
-export NORM="\033[0m"
-export BLINK="\033[5m"
-export UNDR="\033[4m" 
-export WHITE_F="\033[37m";
-export WHITE_B="\033[47m"
-export RED_F="\033[31m";
-export RED_B="\033[41m"
-export BLUE_F="\033[34m";
-export BLUE_B="\033[44m"
-export YELLOW_F="\033[33m";
-export YELLOW_B="\033[43m"
-export GREEN_F="\033[32m";
-export GREEN_B="\033[42m"
-export WHITE_F="\033[37m";
-export WHITE_B="\033[47m"
+BOLD='\033[1;37m'
+NORM="\033[0m"
+UNDR="\033[4m" 
+RED_F="\033[1;31m"
+BLUE_F="\033[1;34m"
+YELLOW_F="\033[1;33m"
+GREEN_F="\033[1;32m"
 typeset -r PATCH_REL_TYPE='PATCH'
 typeset -r FULL_REL_TYPE='FULL'
 
@@ -208,7 +199,7 @@ explodeEar(){
 	echoi "Exploding EAR ..."
    if [[ -d ${MYDOMDIR} ]]; then
       local FILE="${MYDOMDIR}/${LIVE}/icargo.ear"
-      if [[ -w ${FILE} ]]; then
+      if [[ -f ${FILE} ]]; then
          typeset RCODE=`unzip -l ${FILE} | grep icargo/ | wc -l`
          if [[ $? -eq 0 ]]; then
             if [[ ${RCODE} -le 1 ]]; then
@@ -244,7 +235,7 @@ explodeWar(){
 
    if [[ -d ${MYDOMDIR} ]]; then
       typeset FILE=${MYDOMDIR}/${LIVE}/${APP}/icargo-web.war
-      if [[ -w ${FILE} ]]; then
+      if [[ -f ${FILE} ]]; then
          typeset RCODE=`unzip -l ${FILE} | grep icargo-web/ | wc -l`
          if [[ $? -eq 0 ]]; then
             if [[ ${RCODE} -le 1 ]]; then
@@ -270,7 +261,7 @@ explodeWar(){
            return 1
         fi
       else
-        echoe "No write permission on ${FILE}"
+        echow "iCargo Web WAR absent ${FILE}"
         return 1
       fi
    else
@@ -286,12 +277,12 @@ explodeConfig(){
 	
    if [[ -n ${MYDOMDIR} ]]; then
       local FILE="${MYDOMDIR}/${LIVE}/${ICOCONFIG}.zip"
-      if [[ -w ${FILE} ]]; then
+      if [[ -f ${FILE} ]]; then
          typeset RCODE=`unzip -l ${FILE} | grep ${ICOCONFIG}/ | wc -l`
          if [[ $? -eq 0 ]]; then
             if [[ ${RCODE} -le 1 ]]; then
-               mkdir "${MYDOMDIR}/${LIVE}/${ICOCONFIG}"
                local OUTFILE="${MYDOMDIR}/${LIVE}/${ICOCONFIG}"
+               [[ ! -d ${OUTFILE} ]] && mkdir "${OUTFILE}"
             else
                echoi "The zip ${FILE} has an ${ICOCONFIG} sub-directory"
                typeset OUTFILE=${MYDOMDIR}/${LIVE}
@@ -356,6 +347,7 @@ archivePreviousApp(){
    local DOMAIN=${1}
    local MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
    local PRVVRSN=$(retrievePreviousVersionId ${DOMAIN})
+   echoi "Archiving iCargo binary ..."
    if [[ -n "${PRVVRSN}" ]]; then
       local CURRENTAPPDIR="${MYDOMDIR}/${LIVE}/${APP}"
       if [[ -d ${CURRENTAPPDIR} ]]; then
@@ -370,18 +362,20 @@ archivePreviousApp(){
          fi
       else
          echoe "No write permission on ${CURRENTAPPDIR} or directory does not exist"
-      fi      
-      CURDIR=$(pwd)
-      if [[ -d ${DESTFILE}/${APP}/icargo-web} ]]; then
-         cd ${DESTFILE}/${APP}/icargo-web
-         jar -cf icargo-web.war .
-         mv icargo-web.war ../
-         cd ${DESTFILE}/${APP}
-         rm ${DESTFILE}/${APP}/icargo-web
       fi
-      if [[ -d ${DESTFILE}/${APP} ]]; then
-         cd ${DESTFILE}/${APP}
-         jar -cf icargo.ear .      
+      local CURDIR=$(pwd)
+      local EARDIR="${DESTFILE}/${APP}"
+      local WARDIR="${EARDIR}/icargo-web"
+      if [[ -d ${WARDIR} ]]; then
+         cd ${WARDIR}
+         zip -qr icargo-web.war .
+         mv icargo-web.war ../
+         cd ${EARDIR}
+         rm -r ${WARDIR}
+      fi
+      if [[ -d ${EARDIR} ]]; then
+         cd ${EARDIR}
+         zip -qr icargo.ear .      
          mv icargo.ear ../
          cd ../  
          rm -r ${APP}
@@ -398,20 +392,19 @@ archivePreviousApp(){
 archiveCurrentApp(){
    typeset DOMAIN=${1}
    typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
-
-   if [[ -x ${MYDOMDIR} ]]; then
+   if [[ -d ${MYDOMDIR} ]]; then
       typeset FILE=${MYDOMDIR}/${LIVE}/icargo.ear
-      if [[ -w ${FILE} ]]; then
+      if [[ -f ${FILE} ]]; then
          typeset DESTFILE=${MYDOMDIR}/${ARCHIVE}/icargo.ear
          mv ${FILE} ${DESTFILE}
          if [[ $? == 0 ]]; then
-            echoi "Moved ${FILE} to ${DESTFILE}"
+            echoi "Moved current application to ${DESTFILE}."
             return 0
          else
             return 1
          fi   
       else
-         echoe "No write permission on ${FILE}" >&2
+         echoe "No write permission on ${FILE}"
          return 1
       fi
    fi
@@ -421,6 +414,7 @@ archivePreviousConfig(){
    typeset DOMAIN=${1}
    typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
    typeset PRVVRSN=$(retrievePreviousVersionId ${DOMAIN})
+   echoi "Archiving iCargoConfig ..."
    if [ -n "${PRVVRSN}" ]; then
       typeset CURRENTCONFIGDIR=${MYDOMDIR}/${LIVE}/${ICOCONFIG}
       if [[ -d ${CURRENTCONFIGDIR} ]]; then
@@ -429,18 +423,16 @@ archivePreviousConfig(){
          fi
          typeset DESTFILE=${MYDOMDIR}/${ARCHIVE}/${PRVVRSN}
          cp -pr ${CURRENTCONFIGDIR} ${DESTFILE}   
-         if [[ $? == 0 ]]; then
-            echoi "Moved -> ${CURRENTCONFIGDIR} to ${DESTFILE}"
-         else
+         if [[ $? -ne 0 ]]; then
             return 1
          fi
       else
-         echoe "No write permission on ${CURRENTCONFIGDIR} or file does not exist" >&2
+         echoe "No write permission on ${CURRENTCONFIGDIR} or file does not exist"
       fi
       CURDIR=$(pwd) 
       if [[ -d ${DESTFILE}/${ICOCONFIG} ]]; then
          cd ${DESTFILE}/${ICOCONFIG}
-         jar -cf ${ICOCONFIG}.zip .
+         zip -qr ${ICOCONFIG}.zip .
          mv ${ICOCONFIG}.zip ../
          cd ../  
          rm -r ${ICOCONFIG}
@@ -458,19 +450,19 @@ archiveCurrentConfig(){
    typeset DOMAIN=${1}
    typeset MYDOMDIR=$(getDomainDirectoryForDomain ${DOMAIN})
 
-   if [[ -x ${MYDOMDIR} ]]; then
+   if [[ -d ${MYDOMDIR} ]]; then
       typeset FILE=${MYDOMDIR}/${LIVE}/${ICOCONFIG}.zip
-      if [[ -w ${FILE} ]]; then
+      if [[ -f ${FILE} ]]; then
          typeset DESTFILE=${MYDOMDIR}/${ARCHIVE}/${ICOCONFIG}.zip
          mv ${FILE} ${DESTFILE}
          if [[ $? == 0 ]]; then
-            echoi "Moved ${FILE} to ${DESTFILE}"
+            echoi "Moved current iCargoConfig to ${DESTFILE}."
             return 0
          else
             return 1
          fi
       else
-         echoe "No write permission on ${FILE}" >&2
+         echoe "No write permission on ${FILE}"
          return 1
       fi
    fi
@@ -501,7 +493,7 @@ changeWebAppAndContext(){
          mv ${OUTFILE} ${FILE}
       
       else
-         echoe "No write permission on ${FILE} or file does not exist" >&2
+         echoe "No write permission on ${FILE} or file does not exist"
          return 1
       fi
       return 0
@@ -525,7 +517,7 @@ cleanTemp(){
             echow "Could not clean Temp Location ${TMPMDIR}"
          fi
       else
-         echow "No write permission on ${TMPMDIR} or does not exist" >&2
+         echow "No write permission on ${TMPMDIR} or does not exist"
       fi
    done
    return 0
@@ -889,7 +881,7 @@ enableICOLogging() {
       JMX_PORT=$(getJMXPort ${WLS_INSTANCE})
       if [[ $? == 0 ]]; then
          #Enable ICO Logs
-         java -jar ${LOG_CNTRL} -p ${JMX_PORT} -ea
+         ${JAVA_HOME}/bin/java -jar ${LOG_CNTRL} -p ${JMX_PORT} -ea
          if [[ $? != 0 ]]; then
            echoe "Enabling ICO Logging Failed" >&2
          fi
@@ -913,7 +905,7 @@ disableICOLogging() {
       JMX_PORT=$(getJMXPort ${WLS_INSTANCE})
       if [[ $? == 0 ]]; then
          #Disable ICO Logs
-         java -jar ${LOG_CNTRL} -p ${JMX_PORT} -da
+         ${JAVA_HOME}/bin/java -jar ${LOG_CNTRL} -p ${JMX_PORT} -da
          if [[ $? != 0 ]]; then
             echoe "Disable ICO Logging Failed" >&2
          fi
@@ -1034,7 +1026,7 @@ archivePreviousJigsawApp(){
       CURDIR=$(pwd) 
       if [[ -d ${DESTFILE}/jigsaw} ]]; then
          cd ${DESTFILE}/jigsaw  
-         jar -cf jigsaw.war .      
+         zip -qr jigsaw.war .      
          mv jigsaw.war ../
          cd ../  
          rm -r jigsaw
