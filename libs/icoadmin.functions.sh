@@ -442,7 +442,7 @@ archivePreviousConfig(){
       echoi "Archived ${ICOCONFIG} to ${FILE}"
       return 0
    else
-      echow "No pervious iCargoConfig to archive... So skipping"
+      echow "No previous iCargoConfig to archive... So skipping"
    fi
 }
 
